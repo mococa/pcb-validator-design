@@ -17,9 +17,22 @@ The customer sees what the spoke received and what it understood before trusting
 | Processing state | Follow the run from file reading to layer mapping, geometry normalization and rule evaluation. | The worker reports progress to the Spoke API, which streams it to the browser over SSE. |
 | Assigned manufacturing profile | See the profile and ruleset version used for the run. | Trace supplies the assigned profile. The spoke owns and versions the DFM rules that evaluate against it. Both are read-only to the customer. |
 
+## Board inspection
+
+The board is the reference for every finding. The customer can move between the list and the geometry without re-running validation.
+
+| Feature | Customer capability | How it works |
+| --- | --- | --- |
+| Board rendering | See the board as a rendered design rather than a file list. | The server sends normalized geometry to the browser, which renders it with Canvas or WebGL. The browser never parses Gerber. |
+| Layer control | Toggle top, inner 1, inner 2, bottom, soldermask, silkscreen, drill and outline. | Layer visibility is a local rendering state. The underlying geometry is already normalized and cached. |
+| Zoom, pan and fit | Inspect dense areas and return to the full board. | Interaction happens in the browser and does not trigger a server round trip. |
+| Finding overlays | See where each finding sits on the board. | Findings carry a geometry reference, so the renderer can place and highlight them directly. |
+| Finding selection | Move from a list item to the exact violating geometry. | Selecting a finding focuses and zooms the board; the finding detail stays in sync. |
+| Finding detail | Read the rule, measured value, required threshold, layer and affected geometry. | The finding record is stored with the run and linked to the rule and geometry that produced it. |
+| Severity grouping | Separate findings by technical severity: errors, warnings and informational results. | The spoke reports technical severity. Trace decides which findings block checkout. |
+
 ## Areas to cover
 
-- Board inspection
 - Finding resolution
 - Revision workflow
 - Results and handoff
