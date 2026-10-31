@@ -57,6 +57,16 @@ Validation is a loop, not a one-time report. Every revision and every run remain
 | Revision history | Follow the sequence of uploads and runs. | The spoke keeps run history and derived data; Trace keeps the original files. |
 | Run provenance | See the inputs behind a result. | Each run records the revision hash, parser versions, ruleset version, profile snapshot, worker image, timestamps and outcome. |
 
-## Areas to cover
+## Results and handoff
 
-- Results and handoff
+A completed run is not the same as checkout eligibility. The spoke reports, and Trace decides.
+
+| Feature | Customer capability | How it works |
+| --- | --- | --- |
+| Validation summary | See findings by technical severity and the overall result. | The summary is computed from the persisted findings for the run. Trace applies checkout blocking separately. |
+| Findings in the order | Keep validation problems attached to the order. | The spoke posts order-scoped findings to Trace. Trace applies its checkout policy to them. |
+| Priceable items | See the manufacturing items the validator can derive from the package. | The spoke posts items such as PCB fabrication and, when the paste input exists, a stencil with a spec and quantity. Trace owns the cost roll-up. |
+| Pending items | Understand what is not priced yet. | If a paste layer is missing, the stencil stays pending until the file is provided or a fallback aperture is approved. |
+| Checkout eligibility | Know whether the order can proceed. | Trace applies its own checkout policy. A completed run can still contain findings that block checkout. |
+| Return to order | Continue the Trace workflow. | The customer returns to the order with findings, items and run history in place. |
+| Validation history | Access previous run results and their provenance. | Previous runs and their provenance remain available with the order and the spoke. |
