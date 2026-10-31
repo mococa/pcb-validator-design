@@ -80,6 +80,8 @@ The PCB Validator uses a hub-and-spoke architecture.
 - Normalized PCB geometry.
 - Larger validation artifacts.
 
+The worker writes derived artifacts to object storage. The API reads these artifacts when serving the browser.
+
 ### 6\. Trace Hub API
 
 **Responsibilities:**
@@ -145,7 +147,8 @@ The worker accesses Trace through its authorized Hub API access. It reports resu
 9. **Retrieve geometry:** The API reads derived geometry from object storage when serving the browser.
 10. **Stream progress:** The API streams validation progress and completion events to the browser through SSE.
 11. **Return and display results:** The API returns validation results and geometry references or payloads to the browser, which displays the completed results.
-12. **Upload revision:** The browser uploads a revised package to Trace, and the customer triggers validation again from the spoke UI.
+12. **Upload revision:** The browser uploads a revised package to Trace. The customer triggers validation again from the spoke UI; the spoke reads the new revision through the Hub API and starts a new validation run.
+13. **Submit findings:** After the run is persisted, the spoke posts findings and priceable order items to Trace. If Trace is unavailable, this post can be retried without rerunning validation.
 
 ## Important Architectural Rules
 
@@ -156,4 +159,5 @@ The worker accesses Trace through its authorized Hub API access. It reports resu
 - The validation worker never accesses PostgreSQL directly.
 - The validation worker communicates results through the Spoke API.
 - The Spoke API owns persistence of validation state and findings.
+- The worker uses its own authorized access to retrieve original files from Trace.
 - Trace remains the source of truth for orders, identity, assigned manufacturing profiles, and checkout.
