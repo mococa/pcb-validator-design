@@ -44,7 +44,19 @@ A finding is useful only if the customer understands the constraint and knows wh
 | Resolution | Know when a finding is actually fixed. | A finding closes only when a later validation run confirms the geometry is no longer present. A checkbox cannot resolve it. |
 | No in-app editing | Keep the design authority in the EDA tool. | The validator never edits geometry. It returns the customer to their design tool with the constraint clearly identified. |
 
+## Revision workflow
+
+Validation is a loop, not a one-time report. Every revision and every run remain traceable.
+
+| Feature | Customer capability | How it works |
+| --- | --- | --- |
+| Upload a revised package | Submit a corrected design without losing the previous one. | The browser uploads the new package to Trace. Original files and revisions stay in the hub. |
+| Immutable revisions | Compare the current design with earlier revisions. | Each revision is identified by a content hash. The spoke records a manifest and never overwrites the original package. |
+| Revalidation | Run the checks again against the new revision. | The customer triggers validation again in the spoke. The spoke reads the new revision through the Hub API and starts a new run. |
+| Run comparison | See which findings were resolved, which are new, and which persist across runs. | Findings are linked to revision, run, rule and geometry, so the spoke compares finding sets between runs. There is no visual design diff in the MVP. |
+| Revision history | Follow the sequence of uploads and runs. | The spoke keeps run history and derived data; Trace keeps the original files. |
+| Run provenance | See the inputs behind a result. | Each run records the revision hash, parser versions, ruleset version, profile snapshot, worker image, timestamps and outcome. |
+
 ## Areas to cover
 
-- Revision workflow
 - Results and handoff
