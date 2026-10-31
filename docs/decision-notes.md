@@ -68,3 +68,104 @@ It reports metadata and findings to the API, and the API persists run state.
 Trade-off: Some state is visible in two places: the hub scopes findings and items, the spoke keeps provenance.
 
 The rule is that the hub is authoritative for the order and the money, and the spoke is authoritative for the run and the geometry.
+
+## 04. Finding resolution
+
+Decision: Customers fix designs in their EDA software, upload a new revision, and rerun validation. Acknowledgement is not resolution.
+
+A validator that can edit geometry becomes a second source of truth and a much larger product.
+
+The honest loop is:
+
+1. Understand the constraint.
+2. Change the board in the tool that owns the design.
+3. Upload a revision.
+4. Let a new run prove the fix.
+
+Acknowledgement, will address, and request manufacturing review are tracking states.
+
+A finding closes only when a later run confirms the geometry is gone.
+
+Trade-off: The loop is slower than a one-click fix, but it is trustworthy.
+
+A finding cannot disappear because someone checked a box, and the order keeps the evidence.
+
+## 05. Data and lifecycle
+
+Decision: Revision-scoped validation runs, persisted state and findings, and object storage for larger derived artifacts.
+
+Every revision is immutable and identified by a content hash.
+
+Every run records:
+
+- Revision hash
+- Parser versions
+- Ruleset version
+- Profile snapshot
+- Worker image
+- Timestamps
+- Outcome
+
+Findings link back to the run, the rule, and the geometry.
+
+A re-run creates a new run, never an in-place edit, so "why did this pass last week" stays answerable.
+
+PostgreSQL holds run state and findings; object storage holds normalized geometry and larger artifacts, and the API reads it when serving the browser.
+
+Trade-off: Storage grows with every revision and run.
+
+The mitigation is content-hash reuse, a retention policy for superseded artifacts, and keeping the source package in Trace rather than copying it into the spoke.
+
+## 06. MVP and non-goals
+
+Decision: Ship the core loop: the supported file formats, layer viewing, a focused set of DFM checks, findings, and order-item handoff.
+
+The MVP is:
+
+- One package shape (RS-274X Gerber plus Excellon).
+- Initial support for a defined four-layer board configuration.
+- Explicit layer mapping.
+- Normalized geometry.
+- A board viewer.
+- A small rule set.
+- Revision upload and revalidation.
+- Findings.
+- Priceable items posted back to Trace.
+
+The checks I would start with are:
+
+- Clearance.
+- Annular ring.
+- Drill aspect ratio.
+- Soldermask sliver.
+- Copper to board edge.
+
+That is enough to prove the loop and enough to be wrong in useful ways.
+
+### In the MVP
+
+- Gerber and Excellon package
+- Defined four-layer configuration
+- Layer mapping and viewer
+- Focused DFM rules
+- Findings with geometry
+- Revision upload and rerun
+- Findings and order items in Trace
+
+### Not building
+
+- PCB editor or auto-repair
+- Every CAD and Gerber dialect
+- Electrical, signal, thermal checks
+- Stackup, BOM, stencil or assembly apps
+- Checkout, payments or tracking
+- Generic workflow platform
+
+## Closing thought
+
+What I would retire first: parser fidelity and the mapping from a finding to the exact geometry.
+
+If a highlighted clearance lands on the wrong trace, nothing else in the product matters.
+
+The rest of the system is conventional; that mapping is where trust is won or lost.
+
