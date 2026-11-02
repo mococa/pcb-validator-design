@@ -163,7 +163,7 @@ That is enough to prove the loop and enough to be wrong in useful ways.
 
 ## Closing thought
 
-What I would retire first: parser fidelity and the mapping from a finding to the exact geometry.
+What I would de-risk first: parser fidelity and the mapping from a finding to the exact geometry.
 
 If a highlighted clearance lands on the wrong trace, nothing else in the product matters.
 

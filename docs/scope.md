@@ -27,7 +27,7 @@ These are separate logical stages, even if initially implemented in one processi
 - Original package files.
 - Assigned manufacturing profiles.
 - App registry and permissions.
-- Order items, findings, costing and checkout.
+- Order items, order-scoped findings, costing and checkout.
 - Production tracking and evidence.
 
 ### PCB Validator Spoke
@@ -35,7 +35,7 @@ These are separate logical stages, even if initially implemented in one processi
 - Layer identification and geometry normalization.
 - Validation runs and processing history.
 - DFM rules that evaluate against the assigned manufacturing profile.
-- Findings computation.
+- Validation findings, including computation, provenance and resolution across runs.
 - Derived geometry and rendering artifacts.
 - Validator UI.
 
