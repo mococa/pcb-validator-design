@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://menina.moureau.dev/schema/v1/menina.schema.json
+version: 1
+project: pcb-validator-design
+environment: production
+
+vars:
+  ENVIRONMENT: production
+  DOMAIN: pcb-design.moureau.dev
+
+defaults:
+  context: .
+  tag: ${ENVIRONMENT}
+
+apps:
+  web:
+    dockerfile: Dockerfile
+    service: { port: 80 }
+    host: ${DOMAIN}

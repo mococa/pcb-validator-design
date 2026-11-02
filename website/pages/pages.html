@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCB Validator - Trace spoke mockups</title>
+<style>
+  :root {
+    --bg: #eef0f3;
+    --panel: #ffffff;
+    --line: #dfe3e8;
+    --line-soft: #eceff3;
+    --ink: #1b1f24;
+    --muted: #667085;
+    --faint: #98a2b3;
+    --accent: #2563eb;
+    --accent-soft: #eef4ff;
+    --danger: #d92d20;
+    --danger-soft: #fef3f2;
+    --warn: #b54708;
+    --warn-soft: #fffaeb;
+    --ok: #067647;
+    --ok-soft: #ecfdf3;
+    --board: #0b1220;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    color: var(--ink);
+    font: 14px/1.45 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 44px 30px 90px; }
+  .page-head { max-width: 760px; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700;
+  }
+  h1 { font-size: 30px; line-height: 1.15; margin: 10px 0 10px; letter-spacing: -.02em; }
+  .page-head p { margin: 0; color: var(--muted); font-size: 14px; }
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .toc a {
+    color: var(--ink); text-decoration: none; font-size: 12px; font-weight: 600;
+    border: 1px solid var(--line); background: #fff; border-radius: 999px;
+    padding: 6px 12px;
+  }
+  .toc a:hover { border-color: #b9c0ca; }
+
+  .screen { margin-top: 46px; }
+  .screen-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+  .screen-head .num {
+    display: inline-grid; place-items: center; width: 26px; height: 26px;
+    border-radius: 8px; background: var(--ink); color: #fff;
+    font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+  .screen-head h2 { font-size: 16px; margin: 0; letter-spacing: -.01em; }
+  .screen-head .note { color: var(--muted); font-size: 12px; }
+  .screen-note {
+    max-width: 940px; margin: -2px 0 13px 38px; color: var(--muted);
+    font-size: 12.5px; line-height: 1.55;
+  }
+  .screen-note b { color: var(--ink); font-weight: 600; }
+
+  .browser {
+    background: #fff; border: 1px solid #d6dbe2; border-radius: 13px;
+    overflow: hidden; box-shadow: 0 1px 2px rgba(16,24,40,.05), 0 18px 40px rgba(16,24,40,.08);
+  }
+  .chrome {
+    display: flex; align-items: center; gap: 12px; height: 38px;
+    padding: 0 14px; background: #f8f9fb; border-bottom: 1px solid var(--line);
+  }
+  .dots { display: flex; gap: 6px; }
+  .dots i { width: 9px; height: 9px; border-radius: 50%; background: #d0d5dd; }
+  .url {
+    flex: 1; max-width: 520px; height: 24px; display: flex; align-items: center;
+    gap: 7px; padding: 0 10px; background: #fff; border: 1px solid var(--line);
+    border-radius: 6px; color: var(--faint); font: 11px/1 var(--mono);
+    overflow: hidden; white-space: nowrap;
+  }
+  .url b { color: var(--muted); font-weight: 500; }
+  .lock { width: 7px; height: 9px; border: 1.5px solid #98a2b3; border-radius: 2px; position: relative; }
+  .lock::before { content: ""; position: absolute; left: 1px; top: -4px; width: 3px; height: 4px; border: 1.5px solid #98a2b3; border-bottom: 0; border-radius: 3px 3px 0 0; }
+
+  .app { background: #fbfbfc; }
+  .appbar {
+    display: flex; align-items: center; gap: 14px; padding: 0 18px; height: 52px;
+    background: #fff; border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: -.01em; }
+  .mark {
+    display: inline-grid; place-items: center; width: 24px; height: 24px;
+    border-radius: 7px; color: #fff; font-size: 12px; font-weight: 800;
+    background: linear-gradient(145deg, #1d4ed8, #0f172a);
+  }
+  .crumbs { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; }
+  .crumbs b { color: var(--ink); font-weight: 600; }
+  .crumbs span { color: #c0c6d0; }
+  .spacer { flex: 1; }
+  .org { font-size: 12px; color: var(--muted); }
+  .avatar {
+    width: 27px; height: 27px; border-radius: 50%; display: grid; place-items: center;
+    background: #e8edf7; color: #334155; font-size: 10px; font-weight: 700;
+  }
+  .orderstrip {
+    display: flex; align-items: center; gap: 18px; padding: 9px 18px;
+    background: var(--accent-soft); border-bottom: 1px solid #dbe6ff;
+    color: #1d3f91; font-size: 12px;
+  }
+  .orderstrip b { font-weight: 700; }
+  .orderstrip .dot { width: 3px; height: 3px; border-radius: 50%; background: #8fb0f5; }
+  .orderstrip .right { margin-left: auto; color: #3b5fb8; }
+
+  .card {
+    background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  }
+  .card-head {
+    display: flex; align-items: center; gap: 8px; padding: 12px 14px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .card-head h3 { margin: 0; font-size: 12px; letter-spacing: .02em; text-transform: uppercase; color: var(--muted); }
+  .card-head .link { margin-left: auto; color: var(--accent); font-size: 11px; font-weight: 600; }
+  .card-body { padding: 14px; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    height: 32px; padding: 0 13px; border-radius: 7px; border: 1px solid var(--line);
+    background: #fff; color: var(--ink); font: 600 12px/1 var(--sans); cursor: default;
+    white-space: nowrap;
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.ghost { background: #fff; }
+  .btn.small { height: 27px; padding: 0 10px; font-size: 11px; border-radius: 6px; }
+  .btn:disabled { opacity: .55; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 7px;
+    border-radius: 5px; font-size: 10px; font-weight: 700; letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .badge.ok { background: var(--ok-soft); color: var(--ok); }
+  .badge.warn { background: var(--warn-soft); color: var(--warn); }
+  .badge.danger { background: var(--danger-soft); color: var(--danger); }
+  .badge.neutral { background: #f2f4f7; color: #475467; }
+  .badge.info { background: var(--accent-soft); color: #1d4ed8; }
+
+  .muted { color: var(--muted); }
+  .faint { color: var(--faint); }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .tiny { font-size: 11px; }
+  .kicker { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); font-weight: 700; }
+
+  /* ---------------- Screen 1 ---------------- */
+  .s1 { display: grid; grid-template-columns: 292px minmax(0,1fr) 336px; min-height: 640px; }
+  .s1 > * + * { border-left: 1px solid var(--line); }
+  .col { padding: 16px; min-width: 0; }
+  .col.files { background: #fff; }
+  .col.rail { background: #fff; }
+
+  .section-label {
+    display: flex; align-items: center; gap: 8px; margin: 0 0 10px;
+    font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .section-label .count { color: var(--faint); font-weight: 600; }
+  .section-label .right { margin-left: auto; }
+
+  .file {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 8px; border-radius: 7px; border: 1px solid transparent;
+  }
+  .file + .file { margin-top: 2px; }
+  .file:hover { background: #f8f9fb; }
+  .file.selected { background: var(--accent-soft); border-color: #d5e3ff; }
+  .file .ext {
+    width: 30px; height: 30px; border-radius: 6px; display: grid; place-items: center;
+    background: #f2f4f7; border: 1px solid #e4e7ec; color: #475467;
+    font: 700 8px/1 var(--mono); text-transform: uppercase; flex: none;
+  }
+  .file .name { min-width: 0; flex: 1; }
+  .file .name strong { display: block; font: 600 12px/1.3 var(--sans); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file .name span { display: block; color: var(--faint); font-size: 10.5px; }
+  .file .flag { flex: none; }
+
+  .upload-action {
+    margin-top: 12px; padding: 11px 12px; border: 1px solid var(--line);
+    border-radius: 8px; background: #fcfcfd;
+  }
+  .upload-action .ua-title { display: block; font-size: 12px; font-weight: 700; color: var(--ink); }
+  .upload-action .ua-note { display: block; margin-top: 3px; color: var(--muted); font-size: 10.5px; line-height: 1.4; }
+  .upload-action .ua-formats { display: block; margin-top: 4px; color: var(--faint); font-size: 10px; }
+  .upload-action .btn { width: 100%; margin-top: 8px; }
+
+  .preview-shell { position: relative; border-radius: 9px; overflow: hidden; border: 1px solid #1e293b; background: var(--board); }
+  .board-svg { display: block; width: 100%; height: auto; }
+  .overlay-status {
+    position: absolute; left: 12px; bottom: 12px; right: 12px;
+    display: flex; align-items: center; gap: 10px; padding: 9px 11px;
+    background: rgba(9, 15, 28, .88); border: 1px solid rgba(148, 163, 184, .25);
+    border-radius: 8px; color: #e2e8f0; backdrop-filter: blur(4px);
+  }
+  .overlay-status .spin {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid rgba(148,163,184,.35); border-top-color: #93c5fd;
+    animation: spin 1s linear infinite; flex: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .progress { height: 4px; border-radius: 99px; background: rgba(148,163,184,.22); overflow: hidden; }
+  .progress i { display: block; height: 100%; width: 75%; background: #60a5fa; border-radius: inherit; }
+  .overlay-tag {
+    position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 8px; border-radius: 6px; background: rgba(9,15,28,.82);
+    border: 1px solid rgba(148,163,184,.22); color: #cbd5e1; font-size: 10px; font-weight: 600;
+  }
+  .overlay-tag .dot { width: 6px; height: 6px; border-radius: 50%; background: #60a5fa; }
+
+  .products { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .product {
+    border: 1px solid var(--line); border-radius: 9px; padding: 12px;
+    background: #fff; display: flex; gap: 10px; align-items: flex-start;
+  }
+  .product .ico {
+    width: 32px; height: 32px; border-radius: 8px; flex: none;
+    display: grid; place-items: center; background: #fff7ed; border: 1px solid #fed7aa;
+    color: #b45309; font-size: 14px;
+  }
+  .product.blue .ico { background: var(--accent-soft); border-color: #d3e2ff; color: #1d4ed8; }
+  .product strong { display: block; font-size: 12px; }
+  .product span { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+  .summary-grid .k { color: var(--faint); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+  .summary-grid .v { font-size: 12px; font-weight: 600; margin-top: 1px; }
+
+  .timeline { margin-top: 4px; }
+  .step { display: flex; gap: 10px; position: relative; padding-bottom: 16px; }
+  .step:last-child { padding-bottom: 0; }
+  .step::before {
+    content: ""; position: absolute; left: 8px; top: 18px; bottom: 0; width: 1px; background: var(--line);
+  }
+  .step:last-child::before { display: none; }
+  .step .bullet {
+    width: 17px; height: 17px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    border: 1.5px solid var(--line); background: #fff; font-size: 9px; color: var(--faint);
+    z-index: 1;
+  }
+  .step.done .bullet { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .step.active .bullet { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .step strong { display: block; font-size: 12px; }
+  .step span { display: block; color: var(--faint); font-size: 10.5px; }
+
+  .field { margin-top: 12px; }
+  .field .kicker { display: block; margin-bottom: 5px; }
+  .select {
+    display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px;
+    border: 1px solid var(--line); border-radius: 7px; background: #fff; font-size: 12px;
+  }
+  .select .caret { margin-left: auto; color: var(--faint); font-size: 10px; }
+  .readonly-field {
+    display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 7px 10px;
+    border: 1px solid var(--line); border-radius: 7px; background: #f8f9fb;
+    font-size: 12px;
+  }
+  .readonly-field .lockline { margin-left: auto; color: var(--faint); font-size: 10px; white-space: nowrap; }
+
+  /* ---------------- Screen 2 ---------------- */
+  .toolbar {
+    display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+    background: #fff; border-bottom: 1px solid var(--line);
+  }
+  .toolbar .run { font-size: 12px; font-weight: 600; }
+  .toolbar .run span { color: var(--faint); font-weight: 400; }
+  .toolbar .grow { flex: 1; }
+  .s2 { display: grid; grid-template-columns: 224px minmax(0,1fr) 368px; height: 700px; }
+  .s2 > * { min-height: 0; }
+  .s2 > * + * { border-left: 1px solid var(--line); }
+  .layers { background: #fff; padding: 14px 12px; }
+  .layer {
+    display: flex; align-items: center; gap: 8px; padding: 7px 7px; border-radius: 6px; font-size: 12px;
+  }
+  .layer:hover { background: #f8f9fb; }
+  .layer .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .layer .eye { margin-left: auto; color: var(--faint); font-size: 10px; }
+  .layer.off { color: var(--faint); }
+  .layer.off .sw { opacity: .35; }
+  .divider { height: 1px; background: var(--line-soft); margin: 12px 4px; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px; font-size: 12px; color: var(--muted); }
+  .switch { width: 26px; height: 15px; border-radius: 99px; background: var(--accent); position: relative; flex: none; }
+  .switch::after { content: ""; position: absolute; top: 2px; right: 2px; width: 11px; height: 11px; border-radius: 50%; background: #fff; }
+  .switch.off { background: #d0d5dd; }
+  .switch.off::after { right: auto; left: 2px; }
+
+  .canvas { background: #0b1220; position: relative; min-width: 0; display: flex; flex-direction: column; }
+  .canvas-bar {
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+    border-bottom: 1px solid rgba(148,163,184,.16); color: #94a3b8; font-size: 11px;
+  }
+  .canvas-bar .right { margin-left: auto; display: flex; gap: 6px; }
+  .tool {
+    height: 24px; min-width: 24px; padding: 0 7px; display: inline-grid; place-items: center;
+    border-radius: 5px; border: 1px solid rgba(148,163,184,.22); color: #cbd5e1;
+    background: rgba(15,23,42,.5); font-size: 10px; font-weight: 600;
+  }
+  .canvas-body { position: relative; flex: 1; display: grid; place-items: center; padding: 16px; overflow: hidden; }
+  .canvas-body .board-svg { max-height: 100%; }
+  .callout {
+    position: absolute; left: 51%; top: 35%; transform: translate(6px, -50%);
+    background: #fff; border-radius: 6px; padding: 6px 8px; font-size: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.3); border-left: 3px solid var(--danger);
+    white-space: nowrap; color: var(--ink);
+  }
+  .callout b { display: block; font-size: 10px; }
+  .callout span { color: var(--muted); }
+  .canvas-legend {
+    position: absolute; left: 12px; bottom: 12px; display: flex; gap: 12px;
+    padding: 6px 9px; border-radius: 6px; background: rgba(9,15,28,.82);
+    border: 1px solid rgba(148,163,184,.2); color: #cbd5e1; font-size: 10px;
+  }
+  .canvas-legend i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+  .scalebar {
+    position: absolute; right: 14px; bottom: 12px; color: #94a3b8; font-size: 9px;
+    font-family: var(--mono); text-align: center;
+  }
+  .scalebar div { width: 52px; height: 5px; border-left: 1px solid #94a3b8; border-right: 1px solid #94a3b8; border-bottom: 1px solid #94a3b8; margin-bottom: 2px; }
+
+  .findings { background: #fff; display: flex; flex-direction: column; min-height: 0; }
+  .tabs { display: flex; gap: 2px; padding: 10px 12px 0; border-bottom: 1px solid var(--line); }
+  .tab {
+    padding: 7px 9px; font-size: 11px; font-weight: 600; color: var(--muted);
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+  .tab .n { color: var(--faint); font-weight: 600; }
+  .finding-list { overflow: hidden; padding: 6px; }
+  .fgroup { padding: 7px 8px 4px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+  .finding {
+    display: flex; gap: 9px; padding: 8px 8px; border-radius: 7px; border: 1px solid transparent;
+  }
+  .finding:hover { background: #f8f9fb; }
+  .finding.selected { background: var(--danger-soft); border-color: #fecdca; }
+  .finding .sev { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex: none; }
+  .finding .sev.b { background: var(--danger); }
+  .finding .sev.w { background: #f79009; }
+  .finding .txt { min-width: 0; flex: 1; }
+  .finding .txt strong { display: block; font-size: 11.5px; line-height: 1.3; font-weight: 600; }
+  .finding .txt span { display: block; color: var(--faint); font-size: 10px; margin-top: 2px; }
+  .finding .val { font: 600 10px/1.3 var(--mono); color: var(--danger); }
+  .finding.selected .val { color: var(--danger); }
+  .fdivider { height: 1px; background: var(--line-soft); margin: 6px 8px; }
+
+  .detail {
+    border-top: 1px solid var(--line); background: #fff; padding: 14px;
+    box-shadow: 0 -10px 24px rgba(16,24,40,.05);
+  }
+  .detail-head { display: flex; align-items: flex-start; gap: 8px; }
+  .detail-head h3 { margin: 0; font-size: 13px; line-height: 1.3; flex: 1; }
+  .detail p { margin: 8px 0 0; color: var(--muted); font-size: 11.5px; line-height: 1.45; }
+  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 11px; }
+  .metric { border: 1px solid var(--line); border-radius: 7px; padding: 8px 9px; }
+  .metric .k { font-size: 9px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); font-weight: 700; }
+  .metric .v { font: 700 15px/1.2 var(--mono); margin-top: 2px; }
+  .metric .v.bad { color: var(--danger); }
+  .metric .v.good { color: var(--ok); }
+  .detail .btn-row { margin-top: 12px; }
+
+  /* ---------------- Screen 3 ---------------- */
+  .s3 { display: grid; grid-template-columns: minmax(0,1fr) 430px; min-height: 660px; }
+  .s3 .left { display: flex; flex-direction: column; min-width: 0; background: #fff; }
+  .s3 .right { border-left: 1px solid var(--line); background: #fff; padding: 18px; }
+  .zoom-wrap { position: relative; flex: 1; background: var(--board); min-height: 420px; }
+  .zoom-wrap .board-svg { height: 100%; width: 100%; object-fit: contain; }
+  .zoom-tag {
+    position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 8px; border-radius: 6px; background: rgba(9,15,28,.84);
+    border: 1px solid rgba(148,163,184,.22); color: #cbd5e1; font-size: 10px; font-weight: 600;
+  }
+  .dim {
+    position: absolute; left: 53%; top: 45%; color: #fca5a5; font: 600 10px/1 var(--mono);
+    background: rgba(69,10,10,.75); border: 1px solid #7f1d1d; padding: 3px 5px; border-radius: 4px;
+  }
+  .revisions { border-top: 1px solid var(--line); padding: 12px 16px; background: #fcfcfd; }
+  .rev-row { display: flex; align-items: center; gap: 10px; padding: 7px 6px; border-radius: 6px; font-size: 12px; }
+  .rev-row:hover { background: #f5f7fa; }
+  .rev-row .tag { font: 700 10px/1 var(--mono); padding: 4px 6px; border-radius: 4px; background: #f2f4f7; color: #475467; }
+  .rev-row.current .tag { background: var(--accent-soft); color: #1d4ed8; }
+  .rev-row .meta { color: var(--faint); font-size: 10.5px; }
+  .rev-row .right { margin-left: auto; }
+
+  .finding-title { display: flex; align-items: flex-start; gap: 9px; }
+  .finding-title h2 { margin: 0; font-size: 16px; line-height: 1.25; letter-spacing: -.01em; flex: 1; }
+  .detail-block { margin-top: 16px; }
+  .detail-block h4 { margin: 0 0 6px; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); }
+  .detail-block p { margin: 0; color: #475467; font-size: 12px; line-height: 1.5; }
+  .detail-block ul { margin: 0; padding-left: 16px; color: #475467; font-size: 12px; line-height: 1.5; }
+  .detail-block li + li { margin-top: 3px; }
+  .kv { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 12px; font-size: 11.5px; }
+  .kv .k { color: var(--faint); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+  .kv .v { font-weight: 600; margin-top: 1px; }
+  .fixbox {
+    border: 1px solid #d5e3ff; background: var(--accent-soft); border-radius: 8px; padding: 11px 12px;
+    font-size: 11.5px; color: #1e3a8a;
+  }
+  .fixbox b { display: block; margin-bottom: 3px; }
+  .checkline { display: flex; gap: 9px; align-items: flex-start; margin-top: 14px; font-size: 11.5px; color: #475467; }
+  .checkline .box { width: 15px; height: 15px; border: 1.5px solid #c6cdd8; border-radius: 4px; flex: none; margin-top: 1px; }
+
+  /* ---------------- Screen 4 ---------------- */
+  .s4 { padding: 22px; }
+  .result-head {
+    display: flex; align-items: flex-start; gap: 14px; padding: 18px;
+    border: 1px solid var(--line); border-radius: 11px; background: #fff;
+  }
+  .result-head .seal {
+    width: 42px; height: 42px; border-radius: 50%; background: #f2f4f7;
+    border: 1px solid #d0d5dd; color: #475467; display: grid; place-items: center;
+    font-size: 18px; font-weight: 700; flex: none;
+  }
+  .result-head h2 { margin: 0; font-size: 18px; letter-spacing: -.01em; }
+  .result-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+  .result-head .actions { margin-left: auto; display: flex; gap: 8px; }
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 12px; }
+  .stat { border: 1px solid var(--line); border-radius: 9px; background: #fff; padding: 12px 14px; }
+  .stat .k { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); font-weight: 700; }
+  .stat .v { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .stat .s { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+  .s4-grid { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); gap: 14px; margin-top: 14px; }
+  .s4-grid .stack > * + * { margin-top: 14px; }
+
+  .table { width: 100%; border-collapse: collapse; }
+  .table th {
+    text-align: left; font-size: 9.5px; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--faint); font-weight: 700; padding: 0 10px 7px; border-bottom: 1px solid var(--line);
+  }
+  .table td { padding: 9px 10px; border-bottom: 1px solid var(--line-soft); font-size: 11.5px; vertical-align: top; }
+  .table tr:last-child td { border-bottom: 0; }
+  .table td.amount { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .table tr.total td { background: #fcfcfd; font-weight: 700; border-top: 1px solid var(--line); }
+  .table .sub { display: block; color: var(--faint); font-size: 10px; margin-top: 1px; }
+
+  .find-row { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-bottom: 1px solid var(--line-soft); }
+  .find-row:last-child { border-bottom: 0; }
+  .find-row .sev { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  .find-row .sev.b { background: var(--danger); }
+  .find-row .sev.w { background: #f79009; }
+  .find-row .t { flex: 1; min-width: 0; font-size: 11.5px; }
+  .find-row .t span { display: block; color: var(--faint); font-size: 10px; }
+  .find-row .mono { font-size: 10px; color: var(--danger); }
+
+  .checklist { padding: 4px 0; }
+  .checkitem { display: flex; align-items: flex-start; gap: 9px; padding: 8px 12px; font-size: 11.5px; }
+  .checkitem .tick {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--ok-soft); color: var(--ok);
+    display: grid; place-items: center; font-size: 9px; font-weight: 800; flex: none; margin-top: 1px;
+  }
+  .checkitem span { display: block; color: var(--faint); font-size: 10px; margin-top: 1px; }
+  .handoff-actions { padding: 12px; }
+
+  .footnote { margin-top: 34px; color: var(--faint); font-size: 11px; }
+  .footnote b { color: var(--muted); }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 7px; height: 31px;
+    padding: 0 12px; border: 1px solid var(--line); border-radius: 7px;
+    background: #fff; color: var(--ink); text-decoration: none;
+    font-size: 12px; font-weight: 600; margin-bottom: 20px;
+  }
+  .back-link:hover { border-color: #b9c0ca; background: #fcfcfd; }
+
+  @media (max-width: 1080px) {
+    .s1 { grid-template-columns: 260px minmax(0,1fr); }
+    .s1 .rail { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+    .s2 { grid-template-columns: 200px minmax(0,1fr); height: auto; }
+    .s2 .findings { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+    .s3 { grid-template-columns: 1fr; }
+    .s3 .right { border-left: 0; border-top: 1px solid var(--line); }
+    .s4-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media print {
+    body { background: #fff; }
+    .wrap { max-width: none; padding: 0; }
+    .screen { page-break-inside: avoid; }
+    .browser { box-shadow: none; }
+    .toc { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back-link" href="index.html">← Back to overview</a>
+  <header class="page-head">
+    <div class="eyebrow">Trace spoke · design exercise</div>
+    <h1>Browser-based PCB Validator</h1>
+    <p>Wireframes for the four states a customer moves through: open the package, review the board, resolve a finding, and hand the result back to the order. The customer fixes the PCB in their own EDA tool; the spoke never edits geometry.</p>
+  </header>
+
+  <nav class="toc">
+    <a href="#s1">1. Package overview</a>
+    <a href="#s2">2. Validation workspace</a>
+    <a href="#s3">3. Finding resolution</a>
+    <a href="#s4">4. Results and handoff</a>
+  </nav>
+
+  <!-- hidden board assets -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <pattern id="grid" width="16" height="16" patternUnits="userSpaceOnUse">
+        <path d="M16 0H0V16" fill="none" stroke="#1e293b" stroke-width=".5" opacity=".55"/>
+      </pattern>
+      <clipPath id="boardclip">
+        <rect x="50" y="30" width="540" height="360" rx="12"/>
+      </clipPath>
+      <symbol id="pcb" viewBox="0 0 640 420">
+        <rect x="50" y="30" width="540" height="360" rx="12" fill="#0d2b20"/>
+        <g clip-path="url(#boardclip)">
+          <rect x="50" y="30" width="540" height="360" fill="url(#grid)"/>
+          <rect x="50" y="30" width="540" height="360" fill="#14532d" opacity=".28"/>
+          <!-- power traces -->
+          <g fill="none" stroke="#f59e0b" stroke-linecap="round" stroke-linejoin="round" opacity=".92">
+            <path d="M80 120H250V200H410" stroke-width="5"/>
+            <path d="M80 300H200V250H360V334H520" stroke-width="5"/>
+            <path d="M140 340V300H240" stroke-width="4"/>
+          </g>
+          <!-- signal traces -->
+          <g fill="none" stroke="#d97706" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M120 80H220V140H300V92H420" stroke-width="2.4"/>
+            <path d="M120 180H180V220H262" stroke-width="2.4"/>
+            <path d="M300 340H480V280H520" stroke-width="2.4"/>
+            <path d="M340 120V262H452" stroke-width="2.4"/>
+            <path d="M420 180H500V260" stroke-width="2.4"/>
+            <path d="M160 260V320H260" stroke-width="2.4"/>
+            <path d="M200 60V100H340" stroke-width="2.4"/>
+            <path d="M440 100V160H500" stroke-width="2.4"/>
+            <path d="M100 220V260H160" stroke-width="2.4"/>
+            <path d="M380 300V360" stroke-width="2.4"/>
+            <path d="M396 232H470V254" stroke-width="2.4"/>
+          </g>
+          <!-- component body and silkscreen -->
+          <g fill="none" stroke="#e5e7eb" stroke-width="1" opacity=".42">
+            <rect x="278" y="138" width="126" height="104" rx="5"/>
+            <rect x="300" y="152" width="82" height="76" rx="3" stroke-dasharray="3 3"/>
+            <circle cx="96" cy="96" r="15"/>
+            <rect x="180" y="240" width="46" height="24" rx="3"/>
+            <rect x="430" y="260" width="40" height="52" rx="3"/>
+            <path d="M268 190h-14M414 190h14M340 128v-14M340 252v14"/>
+          </g>
+          <!-- text -->
+          <g fill="#e5e7eb" opacity=".5" font-family="ui-monospace, monospace" font-size="8">
+            <text x="326" y="192">U1</text>
+            <text x="190" y="256">C4</text>
+            <text x="442" y="290">R7</text>
+            <text x="78" y="74">J1</text>
+            <text x="520" y="348">J2</text>
+          </g>
+          <!-- pads -->
+          <g fill="#fbbf24">
+            <circle cx="120" cy="80" r="5"/><circle cx="220" cy="140" r="4"/>
+            <circle cx="300" cy="92" r="4"/><circle cx="420" cy="92" r="5"/>
+            <circle cx="80" cy="120" r="5"/><circle cx="410" cy="200" r="5"/>
+            <circle cx="80" cy="300" r="5"/><circle cx="520" cy="334" r="5"/>
+            <circle cx="120" cy="180" r="4"/><circle cx="262" cy="220" r="4"/>
+            <circle cx="480" cy="340" r="5"/><circle cx="340" cy="120" r="4"/>
+            <circle cx="452" cy="262" r="4"/><circle cx="500" cy="180" r="4"/>
+            <circle cx="520" cy="260" r="5"/><circle cx="160" cy="260" r="4"/>
+            <circle cx="260" cy="320" r="4"/><circle cx="200" cy="60" r="4"/>
+            <circle cx="500" cy="100" r="4"/><circle cx="100" cy="220" r="4"/>
+            <circle cx="380" cy="360" r="4"/>
+            <circle cx="96" cy="96" r="3"/><circle cx="96" cy="96" r="7" fill="none" stroke="#fbbf24" stroke-width="1.2"/>
+          </g>
+          <!-- IC pads -->
+          <g fill="#fbbf24">
+            <rect x="270" y="150" width="8" height="12" rx="1"/><rect x="270" y="170" width="8" height="12" rx="1"/>
+            <rect x="270" y="190" width="8" height="12" rx="1"/><rect x="270" y="210" width="8" height="12" rx="1"/>
+            <rect x="404" y="150" width="8" height="12" rx="1"/><rect x="404" y="170" width="8" height="12" rx="1"/>
+            <rect x="404" y="190" width="8" height="12" rx="1"/><rect x="404" y="210" width="8" height="12" rx="1"/>
+          </g>
+          <!-- vias -->
+          <g fill="#0b1220" stroke="#fbbf24" stroke-width="1.2">
+            <circle cx="240" cy="160" r="2.6"/><circle cx="360" cy="230" r="2.6"/>
+            <circle cx="180" cy="280" r="2.6"/><circle cx="460" cy="140" r="2.6"/>
+            <circle cx="300" cy="300" r="2.6"/><circle cx="400" cy="120" r="2.6"/>
+          </g>
+        </g>
+        <!-- outline and mounting holes -->
+        <rect x="50" y="30" width="540" height="360" rx="12" fill="none" stroke="#34d399" stroke-width="1.2" opacity=".55"/>
+        <g fill="#0b1220" stroke="#94a3b8" stroke-width="1">
+          <circle cx="68" cy="48" r="5"/><circle cx="572" cy="48" r="5"/>
+          <circle cx="68" cy="372" r="5"/><circle cx="572" cy="372" r="5"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ============ SCREEN 1 ============ -->
+  <section class="screen" id="s1">
+    <div class="screen-head">
+      <span class="num">1</span>
+      <h2>Package overview</h2>
+      <span class="note">Order context, files, detection, and processing status</span>
+    </div>
+    <p class="screen-note">This screen is the first trust boundary. The order supplies a four-layer package, so all four copper layers are listed and mapped explicitly. Anything the pack does not prove, such as drill plating or a missing paste layer, is shown as a question instead of silently assumed. The manufacturing profile is assigned to the order and the ruleset belongs to the spoke, so the customer sees both versions but cannot change them here. Uploading a revised package adds a revision to the order; it does not replace the current revision or its results. The board on this screen is illustrative until normalization finishes; the viewer renders parsed geometry after the run.</p>
+    <div class="browser">
+      <div class="chrome">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="url"><span class="lock"></span><b>trace.alphamachines.com</b>/orders/PR-1042/apps/pcb-validator</div>
+      </div>
+      <div class="app">
+        <div class="appbar">
+          <div class="brand"><span class="mark">T</span> Trace</div>
+          <div class="crumbs">Orders <span>/</span> <b>PR-1042</b> <span>/</span> <span style="color:#1b1f24;font-weight:600">PCB Validator</span></div>
+          <div class="spacer"></div>
+          <div class="org">Acme Robotics · 100 boards</div>
+          <div class="avatar">LM</div>
+        </div>
+        <div class="orderstrip">
+          <span><b>Order PR-1042</b></span>
+          <span class="dot"></span>
+          <span>4-layer control board</span>
+          <span class="dot"></span>
+          <span>Package received 12 Nov, 09:41</span>
+          <span class="right">Revision 3 · <b>Processing</b></span>
+        </div>
+
+        <div class="s1">
+          <!-- files -->
+          <aside class="col files">
+            <div class="section-label">Design package <span class="count">8 files</span></div>
+            <div class="file selected">
+              <div class="ext">gbr</div>
+              <div class="name"><strong>control-top.gbr</strong><span>Gerber · Top copper</span></div>
+              <span class="badge ok flag">Mapped</span>
+            </div>
+            <div class="file">
+              <div class="ext">gbr</div>
+              <div class="name"><strong>control-inner1.gbr</strong><span>Gerber · Inner layer 1</span></div>
+              <span class="badge ok flag">Mapped</span>
+            </div>
+            <div class="file">
+              <div class="ext">gbr</div>
+              <div class="name"><strong>control-inner2.gbr</strong><span>Gerber · Inner layer 2</span></div>
+              <span class="badge ok flag">Mapped</span>
+            </div>
+            <div class="file">
+              <div class="ext">gbr</div>
+              <div class="name"><strong>control-bottom.gbr</strong><span>Gerber · Bottom copper</span></div>
+              <span class="badge ok flag">Mapped</span>
+            </div>
+            <div class="file">
+              <div class="ext">gbr</div>
+              <div class="name"><strong>control-mask.gbr</strong><span>Gerber · Soldermask</span></div>
+              <span class="badge ok flag">Mapped</span>
+            </div>
+            <div class="file">
+              <div class="ext">gbr</div>
+              <div class="name"><strong>control-silk.gbr</strong><span>Gerber · Silkscreen</span></div>
+              <span class="badge ok flag">Mapped</span>
+            </div>
+            <div class="file">
+              <div class="ext">gbr</div>
+              <div class="name"><strong>control-outline.gbr</strong><span>Gerber · Board outline</span></div>
+              <span class="badge ok flag">Mapped</span>
+            </div>
+            <div class="file">
+              <div class="ext">drl</div>
+              <div class="name"><strong>control.drl</strong><span>Excellon · Drill</span></div>
+              <span class="badge ok flag">Mapped</span>
+            </div>
+            <div class="upload-action">
+              <span class="ua-title">Upload a new revision</span>
+              <span class="ua-note">Opens Trace to add a revision to the order. Current results stay until validation runs again.</span>
+              <span class="ua-formats">Accepted formats: Gerber RS-274X, Excellon</span>
+              <button class="btn small primary">Upload new revision</button>
+            </div>
+            <div class="divider"></div>
+            <div class="section-label">Revision <span class="right faint" style="font-weight:500">Revision 3 of 3</span></div>
+          </aside>
+
+          <!-- preview -->
+          <main class="col">
+            <div class="section-label">Package preview <span class="right badge neutral">Normalizing</span></div>
+            <div class="preview-shell">
+              <svg class="board-svg" viewBox="0 0 640 420" role="img" aria-label="Board preview"><use href="#pcb"/></svg>
+              <div class="overlay-tag"><span class="dot"></span> Illustrative preview · not parsed geometry</div>
+              <div class="overlay-status">
+                <div class="spin"></div>
+                <div style="flex:1">
+                  <div style="display:flex;font-size:11px;margin-bottom:5px"><span>Normalizing geometry</span><span style="margin-left:auto;color:#94a3b8">6 of 8 files · geometry</span></div>
+                  <div class="progress"><i></i></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="products">
+              <div class="product">
+                <div class="ico">▦</div>
+                <div><strong>PCB fabrication</strong><span>4-layer · 1.6 mm · ENIG</span><span class="badge ok" style="margin-top:6px">Detected</span></div>
+              </div>
+              <div class="product blue">
+                <div class="ico">▤</div>
+                <div><strong>Solder-paste stencil</strong><span>Top side · aperture pending</span><span class="badge warn" style="margin-top:6px">Pending paste layer</span></div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:14px">
+              <div class="card-head"><h3>Interpretation notes</h3><span class="link">2 warnings</span></div>
+              <div class="card-body" style="padding:10px 14px">
+                <div class="tiny" style="display:flex;gap:8px;padding:4px 0"><span class="badge warn">1</span><span class="muted"><b>Plating type unknown.</b> PTH and NPTH are not distinguished. Confirm drill classification before manufacturing.</span></div>
+                <div class="tiny" style="display:flex;gap:8px;padding:4px 0"><span class="badge warn">2</span><span class="muted"><b>No paste layer found.</b> The stencil item stays pending until a paste file is provided or a fallback aperture is approved.</span></div>
+              </div>
+            </div>
+          </main>
+
+          <!-- rail -->
+          <aside class="col rail">
+            <div class="section-label">Order</div>
+            <div class="summary-grid">
+              <div><div class="k">Customer</div><div class="v">Acme Robotics</div></div>
+              <div><div class="k">Quantity</div><div class="v">100 boards</div></div>
+              <div><div class="k">Board size</div><div class="v mono">100 × 68 mm</div></div>
+              <div><div class="k">Order stackup</div><div class="v">4 copper</div></div>
+            </div>
+            <div class="divider"></div>
+
+            <div class="section-label">Processing</div>
+            <div class="timeline">
+              <div class="step done"><div class="bullet">✓</div><div><strong>Files received</strong><span>8 files · Revision 3 recorded</span></div></div>
+              <div class="step done"><div class="bullet">✓</div><div><strong>Layers mapped</strong><span>4 copper + mask, silk, outline, drill</span></div></div>
+              <div class="step active"><div class="bullet">4</div><div><strong>Geometry normalized</strong><span>Reading apertures and drills</span></div></div>
+              <div class="step"><div class="bullet">5</div><div><strong>DFM rules</strong><span>Waiting on normalized geometry</span></div></div>
+              <div class="step"><div class="bullet">6</div><div><strong>Results</strong><span>Findings and order items</span></div></div>
+            </div>
+
+            <div class="field">
+              <span class="kicker">Manufacturing profile</span>
+              <div class="readonly-field"><span>Standard 4-layer · Profile v3</span><span class="lockline" style="color:var(--accent)">Assigned by Trace · View</span></div>
+            </div>
+            <div class="field">
+              <span class="kicker">Ruleset</span>
+              <div class="readonly-field"><span>Alpha DFM v2.4</span><span class="lockline">Read-only</span></div>
+            </div>
+
+            <div class="btn-row" style="margin-top:16px">
+              <button class="btn primary" disabled style="width:100%">Review findings</button>
+            </div>
+            <div class="tiny faint" style="margin-top:8px;text-align:center">Available when the run finishes. You can leave this page.</div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 2 ============ -->
+  <section class="screen" id="s2">
+    <div class="screen-head">
+      <span class="num">2</span>
+      <h2>Validation workspace</h2>
+      <span class="note">Board viewer, layer control, and the findings wall</span>
+    </div>
+    <p class="screen-note">The board and the findings stay in one view, because the customer needs to compare a measurement with the geometry that produced it. Selecting a finding is a local action: it highlights and zooms the board without re-running validation. Findings are grouped by technical severity, while checkout impact is shown separately because Trace owns that policy. The profile belongs to the order and the ruleset belongs to the spoke, so both are read-only here.</p>
+    <div class="browser">
+      <div class="chrome">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="url"><span class="lock"></span><b>trace.alphamachines.com</b>/orders/PR-1042/apps/pcb-validator/runs/run_8f2</div>
+      </div>
+      <div class="app">
+        <div class="appbar">
+          <div class="brand"><span class="mark">T</span> Trace</div>
+          <div class="crumbs">Orders <span>/</span> <b>PR-1042</b> <span>/</span> PCB Validator <span>/</span> <span style="color:#1b1f24;font-weight:600">Run 8f2</span></div>
+          <div class="spacer"></div>
+          <div class="org">Revision 3 · Acme Robotics</div>
+          <div class="avatar">LM</div>
+        </div>
+        <div class="toolbar">
+          <div class="run">Validation run <span>· finished 12 Nov, 09:43</span></div>
+          <div class="grow"></div>
+          <span class="badge neutral">Standard 4-layer · Profile v3</span>
+          <button class="btn small">Compare runs</button>
+          <button class="btn small primary">Run again</button>
+        </div>
+
+        <div class="s2">
+          <!-- layers -->
+          <aside class="layers">
+            <div class="section-label">Layers</div>
+            <div class="layer"><span class="sw" style="background:#f59e0b"></span>Top copper<span class="eye">◉</span></div>
+            <div class="layer"><span class="sw" style="background:#f97316"></span>Inner 1<span class="eye">◉</span></div>
+            <div class="layer"><span class="sw" style="background:#facc15"></span>Inner 2<span class="eye">◉</span></div>
+            <div class="layer"><span class="sw" style="background:#d97706"></span>Bottom copper<span class="eye">◉</span></div>
+            <div class="layer"><span class="sw" style="background:#4ade80"></span>Soldermask<span class="eye">◉</span></div>
+            <div class="layer"><span class="sw" style="background:#e5e7eb"></span>Silkscreen<span class="eye">◉</span></div>
+            <div class="layer off"><span class="sw" style="background:#fbbf24"></span>Drill<span class="eye">○</span></div>
+            <div class="layer off"><span class="sw" style="background:#34d399"></span>Board outline<span class="eye">○</span></div>
+            <div class="divider"></div>
+            <div class="section-label">Overlays</div>
+            <div class="toggle-row">Findings <span class="switch"></span></div>
+            <div class="toggle-row">Dimensions <span class="switch off"></span></div>
+            <div class="toggle-row">Grid <span class="switch"></span></div>
+            <div class="divider"></div>
+            <div class="section-label">Finding filters</div>
+            <div class="layer"><span class="sw" style="background:#d92d20"></span>Errors <span class="eye">3</span></div>
+            <div class="layer"><span class="sw" style="background:#f79009"></span>Warnings <span class="eye">9</span></div>
+            <div class="layer off"><span class="sw" style="background:#98a2b3"></span>Info <span class="eye">0</span></div>
+            <div class="divider"></div>
+            <div class="section-label">Checkout impact <span class="right faint" style="font-weight:500;text-transform:none;letter-spacing:0">Trace policy</span></div>
+            <div class="layer"><span class="sw" style="background:#475467"></span>Blocks checkout <span class="eye">3</span></div>
+            <div class="layer off"><span class="sw" style="background:#c6cdd8"></span>Does not block <span class="eye">9</span></div>
+            <div class="divider"></div>
+            <div class="tiny faint">Tip: click a finding to focus the board. Use the layer list to isolate copper.</div>
+          </aside>
+
+          <!-- canvas -->
+          <div class="canvas">
+            <div class="canvas-bar">
+              <span>Top copper</span><span class="faint">·</span><span>Revision 3</span>
+              <div class="right">
+                <span class="tool">−</span><span class="tool">100%</span><span class="tool">+</span><span class="tool">Fit</span>
+              </div>
+            </div>
+            <div class="canvas-body">
+              <svg class="board-svg" viewBox="0 0 640 420" role="img" aria-label="Board with a highlighted clearance violation">
+                <use href="#pcb"/>
+                <g>
+                  <circle cx="414" cy="227" r="22" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 3"/>
+                  <circle cx="414" cy="227" r="4" fill="#ef4444" opacity=".7"/>
+                  <path d="M402 214l-22-16" stroke="#ef4444" stroke-width="1.2"/>
+                </g>
+              </svg>
+              <div class="callout"><b>F-004 · clearance</b><span class="mono">0.11 mm &lt; 0.15 mm</span></div>
+              <div class="canvas-legend">
+                <span><i style="background:#f59e0b"></i>Top copper</span>
+                <span><i style="background:#ef4444"></i>Violation</span>
+                <span><i style="background:#fbbf24"></i>Pads</span>
+              </div>
+              <div class="scalebar"><div></div>10 mm</div>
+            </div>
+          </div>
+
+          <!-- findings -->
+          <aside class="findings">
+            <div class="tabs">
+              <div class="tab active">All <span class="n">12</span></div>
+              <div class="tab">Errors <span class="n">3</span></div>
+              <div class="tab">Warnings <span class="n">9</span></div>
+            </div>
+            <div class="finding-list">
+              <div class="fgroup">Errors · technical severity</div>
+              <div class="finding selected">
+                <span class="sev b"></span>
+                <div class="txt"><strong>Clearance below profile</strong><span>Top copper · near U1 pad 4</span></div>
+                <div class="val">0.11</div>
+              </div>
+              <div class="finding">
+                <span class="sev b"></span>
+                <div class="txt"><strong>Annular ring too thin</strong><span>Drill · via at X 62.4 Y 31.0</span></div>
+                <div class="val">0.08</div>
+              </div>
+              <div class="finding">
+                <span class="sev b"></span>
+                <div class="txt"><strong>Drill aspect ratio</strong><span>Drill · 0.2 mm through 1.6 mm</span></div>
+                <div class="val">8:1</div>
+              </div>
+              <div class="fdivider"></div>
+              <div class="fgroup">Warnings · technical severity</div>
+              <div class="finding">
+                <span class="sev w"></span>
+                <div class="txt"><strong>Silkscreen over pad</strong><span>Silkscreen · near C4</span></div>
+              </div>
+              <div class="finding">
+                <span class="sev w"></span>
+                <div class="txt"><strong>Soldermask sliver</strong><span>Mask · between pads 12 and 13</span></div>
+                <div class="val" style="color:#b54708">0.07</div>
+              </div>
+              <div class="finding">
+                <span class="sev w"></span>
+                <div class="txt"><strong>Copper to board edge</strong><span>Top copper · right edge</span></div>
+                <div class="val" style="color:#b54708">0.28</div>
+              </div>
+              <div class="finding">
+                <span class="sev w"></span>
+                <div class="txt"><strong>Unconnected copper island</strong><span>Bottom copper · near J2</span></div>
+              </div>
+            </div>
+
+            <div class="detail">
+              <div class="detail-head">
+                <span class="badge danger">Error</span>
+                <span class="badge neutral">Blocks checkout</span>
+                <h3>F-004 · Clearance below profile</h3>
+                <span class="faint" style="font-size:10px">4 / 12</span>
+              </div>
+              <p>A top-copper trace passes 0.11 mm from pad 4 of U1. The selected profile requires at least 0.15 mm.</p>
+              <div class="tiny faint" style="margin-top:5px">Technical severity: error. Checkout impact: blocks checkout under Trace policy.</div>
+              <div class="metrics">
+                <div class="metric"><div class="k">Measured</div><div class="v bad">0.11 mm</div></div>
+                <div class="metric"><div class="k">Required</div><div class="v good">≥ 0.15 mm</div></div>
+                <div class="metric"><div class="k">Layer</div><div class="v" style="font-size:12px">Top copper</div></div>
+                <div class="metric"><div class="k">Rule</div><div class="v" style="font-size:12px">CLR-02</div></div>
+              </div>
+              <div class="btn-row">
+                <button class="btn small">Acknowledge</button>
+                <button class="btn small">Request manufacturing review</button>
+                <button class="btn small primary">Open finding</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 3 ============ -->
+  <section class="screen" id="s3">
+    <div class="screen-head">
+      <span class="num">3</span>
+      <h2>Finding resolution</h2>
+      <span class="note">One issue, its geometry, and what to change in the EDA tool</span>
+    </div>
+    <p class="screen-note">This is a focused state of the workspace, not a separate editor, and the customer still fixes the board in their EDA tool. The finding states the constraint, the measured geometry, and a suggested remediation framed as guidance. Acknowledgement is tracked separately from resolution: a finding only closes when a later validation run confirms it, never because someone checked a box. Trace owns the original files and revision manifest. The spoke stores the revision reference, content hash, and derived results for each run.</p>
+    <div class="browser">
+      <div class="chrome">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="url"><span class="lock"></span><b>trace.alphamachines.com</b>/orders/PR-1042/apps/pcb-validator/runs/run_8f2/findings/F-004</div>
+      </div>
+      <div class="app">
+        <div class="appbar">
+          <div class="brand"><span class="mark">T</span> Trace</div>
+          <div class="crumbs">Orders <span>/</span> <b>PR-1042</b> <span>/</span> PCB Validator <span>/</span> <b>F-004</b></div>
+          <div class="spacer"></div>
+          <button class="btn small ghost">Back to findings</button>
+          <div class="avatar">LM</div>
+        </div>
+
+        <div class="s3">
+          <div class="left">
+            <div class="zoom-wrap">
+              <svg class="board-svg" viewBox="330 160 170 130" role="img" aria-label="Zoomed board view of the clearance violation">
+                <use href="#pcb"/>
+                <g>
+                  <circle cx="414" cy="227" r="18" fill="none" stroke="#ef4444" stroke-width="1.2" stroke-dasharray="3 2"/>
+                  <line x1="414" y1="222" x2="414" y2="231" stroke="#fca5a5" stroke-width=".8"/>
+                  <line x1="408" y1="222" x2="420" y2="222" stroke="#fca5a5" stroke-width=".8"/>
+                  <line x1="408" y1="231" x2="420" y2="231" stroke="#fca5a5" stroke-width=".8"/>
+                  <circle cx="414" cy="227" r="2.2" fill="#ef4444"/>
+                </g>
+              </svg>
+              <div class="zoom-tag">F-004 · top copper · 400%</div>
+              <div class="dim">0.11 mm</div>
+            </div>
+            <div class="revisions">
+              <div class="section-label" style="margin-bottom:6px">Revision history <span class="right faint" style="font-weight:500">Revision 3 is current</span></div>
+              <div class="rev-row current">
+                <span class="tag">Rev 3</span>
+                <div><div><b>control-r3.zip</b></div><div class="meta">Uploaded 12 Nov · 8 files · current run</div></div>
+                <span class="right badge info">In review</span>
+              </div>
+              <div class="rev-row">
+                <span class="tag">Rev 2</span>
+                <div><div>control-r2.zip</div><div class="meta">Uploaded 11 Nov · 2 errors resolved</div></div>
+                <span class="right badge neutral">Superseded</span>
+              </div>
+              <div class="rev-row">
+                <span class="tag">Rev 1</span>
+                <div><div>control-r1.zip</div><div class="meta">Uploaded 10 Nov · first validation</div></div>
+                <span class="right badge neutral">Superseded</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="right">
+            <div class="finding-title">
+              <span class="badge danger">Error</span>
+              <span class="badge neutral">Blocks checkout</span>
+              <h2>Clearance below profile</h2>
+            </div>
+            <p class="tiny muted" style="margin:6px 0 0">F-004 · rule CLR-02 · run 8f2 · Revision 3</p>
+            <div class="tiny faint" style="margin-top:4px">Status: open · Acknowledgement: not acknowledged</div>
+
+            <div class="metrics" style="grid-template-columns:1fr 1fr 1fr">
+              <div class="metric"><div class="k">Measured</div><div class="v bad" style="font-size:14px">0.11 mm</div></div>
+              <div class="metric"><div class="k">Required</div><div class="v good" style="font-size:14px">0.15 mm</div></div>
+              <div class="metric"><div class="k">Margin</div><div class="v bad" style="font-size:14px">−0.04</div></div>
+            </div>
+
+            <div class="detail-block">
+              <h4>What the rule found</h4>
+              <p>A trace on top copper runs 0.11 mm from pad 4 of U1. The board profile for this order requires 0.15 mm between copper features on the same layer.</p>
+            </div>
+
+            <div class="detail-block">
+              <h4>Where</h4>
+              <div class="kv">
+                <div><div class="k">Layer</div><div class="v">Top copper</div></div>
+                <div><div class="k">Net</div><div class="v mono">SPI_MOSI</div></div>
+                <div><div class="k">Location</div><div class="v mono">X 67.4 · Y 37.2</div></div>
+                <div><div class="k">Geometry</div><div class="v">Trace → pad 4</div></div>
+                <div><div class="k">Severity</div><div class="v">Error</div></div>
+                <div><div class="k">Checkout impact</div><div class="v">Blocks checkout</div></div>
+              </div>
+            </div>
+
+            <div class="detail-block">
+              <h4>Suggested remediation</h4>
+              <div class="fixbox">
+                <b>Guidance, not a design instruction</b>
+                Increase the clearance between these copper features to at least 0.15 mm. Review the trace routing and pad geometry in your EDA tool, then export the package again as Revision 4.
+              </div>
+              <ul style="margin-top:10px">
+                <li>The finding identifies the constraint. The right design change depends on the board.</li>
+                <li>If the design cannot change, request a review by the manufacturing team. The finding stays open.</li>
+              </ul>
+            </div>
+
+            <div class="checkline">
+              <span class="box"></span>
+              <span><b>Acknowledge this finding.</b> It stays open until a new validation run confirms the fix.</span>
+            </div>
+
+            <div class="btn-row" style="margin-top:14px">
+              <button class="btn primary" style="flex:1">Upload revised package</button>
+              <button class="btn">Previous</button>
+              <button class="btn">Next</button>
+            </div>
+            <div class="tiny faint" style="margin-top:8px">Uploading adds a revision in Trace. Validation starts when you run it again. Original files are never overwritten.</div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 4 ============ -->
+  <section class="screen" id="s4">
+    <div class="screen-head">
+      <span class="num">4</span>
+      <h2>Results and handoff</h2>
+      <span class="note">Findings posted back to Trace, order items posted, return to the order</span>
+    </div>
+    <p class="screen-note">The spoke reports and the hub decides. A run can complete while findings that block checkout remain, so checkout eligibility stays a hub policy rather than something the validator grants. The spoke posts findings and the priceable items it can actually derive from the package, keeps the derived data needed to re-render the board, and leaves cost roll-up, checkout, and production tracking to Trace.</p>
+    <div class="browser">
+      <div class="chrome">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="url"><span class="lock"></span><b>trace.alphamachines.com</b>/orders/PR-1042/apps/pcb-validator/runs/run_8f2/summary</div>
+      </div>
+      <div class="app">
+        <div class="appbar">
+          <div class="brand"><span class="mark">T</span> Trace</div>
+          <div class="crumbs">Orders <span>/</span> <b>PR-1042</b> <span>/</span> PCB Validator <span>/</span> <b>Summary</b></div>
+          <div class="spacer"></div>
+          <div class="org">Acme Robotics</div>
+          <div class="avatar">LM</div>
+        </div>
+
+        <div class="s4">
+          <div class="result-head">
+            <div class="seal">✓</div>
+            <div>
+              <h2>Validation complete</h2>
+              <p>Run 8f2 · Revision 3 · Standard 4-layer · Profile v3 · finished 12 Nov, 09:43 · Ruleset Alpha DFM v2.4</p>
+            </div>
+            <div class="actions">
+              <button class="btn">Upload revised package</button>
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="stat"><div class="k">Errors</div><div class="v" style="color:var(--danger)">3</div><div class="s">technical severity</div></div>
+            <div class="stat"><div class="k">Warnings</div><div class="v" style="color:var(--warn)">9</div><div class="s">technical severity</div></div>
+            <div class="stat"><div class="k">Checkout blocks</div><div class="v">3</div><div class="s">Trace policy</div></div>
+            <div class="stat"><div class="k">Order items</div><div class="v">1</div><div class="s">posted · 1 pending</div></div>
+            <div class="stat"><div class="k">Boards</div><div class="v">100</div><div class="s">4-layer · 100 × 68 mm</div></div>
+          </div>
+
+          <div class="s4-grid">
+            <div class="stack">
+              <div class="card">
+                <div class="card-head"><h3>Findings posted to Trace</h3><span class="link">View all 12</span></div>
+                <div>
+                  <div class="find-row"><span class="sev b"></span><div class="t">Clearance below profile<span>F-004 · Top copper · near U1 pad 4</span></div><span class="mono">0.11 mm</span></div>
+                  <div class="find-row"><span class="sev b"></span><div class="t">Annular ring too thin<span>F-007 · Drill · via at X 62.4 Y 31.0</span></div><span class="mono">0.08 mm</span></div>
+                  <div class="find-row"><span class="sev b"></span><div class="t">Drill aspect ratio<span>F-011 · Drill · 0.2 mm through 1.6 mm</span></div><span class="mono">8:1</span></div>
+                  <div class="find-row"><span class="sev w"></span><div class="t">Silkscreen over pad<span>F-002 · Silkscreen · near C4</span></div><span class="mono" style="color:var(--warn)">warn</span></div>
+                  <div class="find-row"><span class="sev w"></span><div class="t">Soldermask sliver<span>F-005 · Mask · between pads 12 and 13</span></div><span class="mono" style="color:var(--warn)">0.07 mm</span></div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-head"><h3>Order items</h3><span class="badge warn" style="margin-left:auto">1 pending</span></div>
+                <div style="padding:0 4px 4px">
+                  <table class="table">
+                    <thead><tr><th>Item</th><th>Spec</th><th style="text-align:right">Qty</th><th style="text-align:right">Cost</th></tr></thead>
+                    <tbody>
+                      <tr><td><b>PCB fabrication</b><span class="sub">Kind: pcb_fab</span></td><td>4-layer · 1.6 mm · ENIG<span class="sub">100 × 68 mm</span></td><td class="amount">100</td><td class="amount">$1,840.00</td></tr>
+                      <tr><td><b>Solder-paste stencil</b><span class="sub">Kind: stencil · pending paste layer</span></td><td>Awaiting paste file or approved fallback<span class="sub">Not priced yet</span></td><td class="amount">1</td><td class="amount" style="color:var(--warn)">Pending</td></tr>
+                      <tr class="total"><td colspan="3">Total posted</td><td class="amount">$1,840.00</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="stack">
+              <div class="card">
+                <div class="card-head"><h3>Handoff to the order</h3></div>
+                <div class="checklist">
+                  <div class="checkitem"><span class="tick">✓</span><div>Original package kept in Trace<span>Revision 3 · content hash recorded on the run</span></div></div>
+                  <div class="checkitem"><span class="tick">✓</span><div>12 findings added to the order<span>3 errors · 9 warnings · linked to run 8f2</span></div></div>
+                  <div class="checkitem"><span class="tick">✓</span><div>1 order item added to the order<span>PCB fabrication posted. Stencil is pending a paste layer.</span></div></div>
+                  <div class="checkitem"><span class="tick">✓</span><div>Validation history available<span>Run 8f2 · finished 12 Nov, 09:43</span></div></div>
+                </div>
+                <div class="handoff-actions">
+                  <button class="btn primary" style="width:100%;height:36px">Return to order PR-1042</button>
+                  <div class="tiny faint" style="margin-top:8px;text-align:center">The run is complete, but Trace keeps checkout blocked while 3 findings remain unresolved. You can upload a revised package from the order at any time.</div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-head"><h3>Run details</h3></div>
+                <div class="card-body" style="padding:10px 14px">
+                  <div class="kv" style="grid-template-columns:1fr">
+                    <div><div class="k">Revision</div><div class="v tiny">Revision 3 · <span class="mono">sha256:9c1f…4a7e</span></div></div>
+                    <div><div class="k">Profile</div><div class="v tiny">Standard 4-layer · Profile v3</div></div>
+                    <div><div class="k">Ruleset</div><div class="v tiny">Alpha DFM v2.4</div></div>
+                    <div><div class="k">Parser</div><div class="v tiny">Gerber 0.8.1 · Excellon 0.5.0</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-head"><h3>What happens next</h3></div>
+                <div class="card-body" style="padding:10px 14px">
+                  <div class="tiny muted" style="line-height:1.55">Fix the three findings that block checkout in your EDA tool, upload the revised package, and run validation again. The stencil item stays pending until a paste layer is provided or a fallback aperture is approved. Trace applies its checkout policy to the new run.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="footnote"><b>Note:</b> these are wireframes, not a finished interface. Pricing and finding counts are illustrative. The layout is deliberately dense because the customer is comparing measurements, layers, and order items at the same time.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCB Validator - Architecture</title>
+<style>
+  :root {
+    --bg: #eef0f3;
+    --line: #dfe3e8;
+    --line-soft: #eceff3;
+    --ink: #1b1f24;
+    --muted: #667085;
+    --faint: #98a2b3;
+    --accent: #2563eb;
+    --trace-soft: #eef4ff;
+    --trace-line: #bfdbfe;
+    --spoke-soft: #fff7ed;
+    --spoke-line: #fdba74;
+    --browser-soft: #f0fdf4;
+    --browser-line: #86efac;
+    --warn: #b54708;
+    --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body { margin: 0; color: var(--ink); font: 14px/1.45 var(--sans); -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 44px 30px 90px; }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 7px; height: 31px;
+    padding: 0 12px; border: 1px solid var(--line); border-radius: 7px;
+    background: #fff; color: var(--ink); text-decoration: none;
+    font-size: 12px; font-weight: 600; margin-bottom: 20px;
+  }
+  .back-link:hover { border-color: #b9c0ca; background: #fcfcfd; }
+  .page-head { max-width: 840px; }
+  .eyebrow { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  h1 { font-size: 30px; line-height: 1.15; margin: 10px 0 10px; letter-spacing: -.02em; }
+  .page-head p { margin: 0; color: var(--muted); font-size: 14px; }
+  .note-line { margin-top: 14px; font-size: 12px; color: var(--faint); }
+  .note-line b { color: var(--muted); }
+
+  .diagram-card {
+    margin-top: 28px; background: #fff; border: 1px solid #d6dbe2;
+    border-radius: 13px; overflow: hidden;
+    box-shadow: 0 1px 2px rgba(16,24,40,.05), 0 18px 40px rgba(16,24,40,.08);
+  }
+  .diagram-scroll { overflow-x: auto; padding: 12px; }
+  .diagram-scroll svg { display: block; width: 100%; min-width: 1040px; height: auto; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 18px; padding: 12px 18px;
+    border-top: 1px solid var(--line); background: #fcfcfd; color: var(--muted);
+    font-size: 11.5px;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; border: 1px solid transparent; }
+  .legend .trace { background: var(--trace-soft); border-color: var(--trace-line); }
+  .legend .spoke { background: var(--spoke-soft); border-color: var(--spoke-line); }
+  .legend .browser { background: var(--browser-soft); border-color: var(--browser-line); }
+  .legend .flow { background: #fff; border-color: #94a3b8; border-radius: 50%; }
+  .legend .upload { border-top: 2px dashed var(--accent); border-radius: 0; height: 0; width: 16px; }
+
+  .node {
+    width: 100%; height: 100%; padding: 12px 14px; border-radius: 11px;
+    background: #fff; border: 1px solid var(--line);
+    font-family: var(--sans); color: var(--ink);
+    box-shadow: 0 1px 1px rgba(16,24,40,.04), 0 5px 14px rgba(16,24,40,.06);
+    overflow: hidden;
+  }
+  .node.browser { background: var(--browser-soft); border-color: var(--browser-line); }
+  .node.spoke { background: #fff; border-color: #e4e7ec; }
+  .node.hub { background: var(--trace-soft); border-color: var(--trace-line); }
+  .node.store { background: #f8fafc; border-color: #cbd5e1; }
+  .node-kicker { font-size: 9.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .node-title { font-size: 14.5px; font-weight: 700; letter-spacing: -.01em; margin-top: 1px; }
+  .node ul { margin: 7px 0 0 0; padding-left: 14px; font-size: 10.5px; line-height: 1.4; color: #475467; }
+  .node li + li { margin-top: 2px; }
+  .node-tag {
+    display: inline-block; margin-top: 7px; padding: 2px 6px; border-radius: 4px;
+    font-size: 9px; font-weight: 700; letter-spacing: .02em;
+    background: #fff; border: 1px solid var(--line); color: var(--muted);
+  }
+  .worker-flow {
+    display: flex; align-items: center; gap: 5px; margin-top: 8px; padding-top: 7px;
+    border-top: 1px dashed #e4e7ec; color: var(--warn); font-size: 9.5px; font-weight: 700;
+  }
+  .worker-flow .n {
+    display: inline-grid; place-items: center; width: 15px; height: 15px;
+    border-radius: 50%; background: #fff7ed; border: 1px solid #fdba74;
+    font-size: 9px; color: #b45309; flex: none;
+  }
+  .worker-flow .arrow { color: #d0d5dd; }
+
+  .columns { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap: 18px; margin-top: 22px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
+  .card-head { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--line-soft); }
+  .card-head h2 { margin: 0; font-size: 13px; letter-spacing: .01em; }
+  .card-head .count { margin-left: auto; font-size: 10px; color: var(--faint); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th {
+    text-align: left; padding: 8px 16px; font-size: 9.5px; color: var(--faint);
+    text-transform: uppercase; letter-spacing: .07em; font-weight: 700;
+    border-bottom: 1px solid var(--line); background: #fcfcfd;
+  }
+  .table td { padding: 10px 16px; border-bottom: 1px solid var(--line-soft); font-size: 11.5px; vertical-align: top; color: #475467; }
+  .table tr:last-child td { border-bottom: 0; }
+  .table td:first-child { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  .table .code { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+
+  .flows { margin: 0; padding: 8px 18px 16px 40px; color: #475467; font-size: 12px; line-height: 1.5; }
+  .flows li { padding: 4px 0; }
+  .flows li::marker { color: var(--accent); font-weight: 700; }
+  .flows b { color: var(--ink); }
+
+  .ownership {
+    margin-top: 18px; padding: 14px 16px; border: 1px solid var(--line);
+    border-radius: 10px; background: #fff; color: #475467; font-size: 12px; line-height: 1.55;
+  }
+  .ownership b { color: var(--ink); }
+  .footnote { margin-top: 24px; color: var(--faint); font-size: 11px; }
+  @media (max-width: 900px) { .columns { grid-template-columns: 1fr; } }
+  @media print {
+    body { background: #fff; }
+    .wrap { max-width: none; padding: 0; }
+    .back-link { display: none; }
+    .diagram-card { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back-link" href="index.html">← Back to overview</a>
+
+  <header class="page-head">
+    <div class="eyebrow">Trace spoke · architecture</div>
+    <h1>PCB Validator architecture</h1>
+    <p>Hub and spoke boundaries, request paths, and the data flows that matter. Trace keeps the order and the original package. The spoke keeps derived geometry and validation history.</p>
+    <div class="note-line"><b>Reading the diagram:</b> solid lines are requests or data, the dashed blue line is a revision upload. Numbered labels match the flow list below. The dashed boundary is the spoke; everything inside it is owned by the validator.</div>
+  </header>
+
+  <section class="diagram-card" aria-label="PCB Validator architecture diagram">
+    <div class="diagram-scroll">
+      <svg viewBox="0 0 1280 980" role="img" aria-label="Diagram of the browser, spoke API, validation worker, databases, object storage, and Trace Hub, with numbered flows">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0L10 5L0 10Z" fill="#475467"/>
+          </marker>
+          <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0L10 5L0 10Z" fill="#2563eb"/>
+          </marker>
+        </defs>
+
+        <rect x="0" y="0" width="1280" height="980" fill="#fbfbfc"/>
+
+        <!-- spoke boundary -->
+        <rect x="310" y="260" width="650" height="650" rx="18" fill="#fff7ed" fill-opacity=".34" stroke="#fdba74" stroke-width="1.2" stroke-dasharray="7 5"/>
+        <text x="332" y="287" font-family="ui-sans-serif, sans-serif" font-size="11" font-weight="700" letter-spacing="1.2" fill="#b45309">PCB VALIDATOR SPOKE</text>
+        <text x="332" y="303" font-family="ui-sans-serif, sans-serif" font-size="10" fill="#9a5b1a">own API, jobs, database and derived artifacts</text>
+
+        <!-- trace hub boundary -->
+        <rect x="1000" y="320" width="260" height="350" rx="18" fill="#eef4ff" fill-opacity=".7" stroke="#bfdbfe" stroke-width="1.2"/>
+        <text x="1020" y="347" font-family="ui-sans-serif, sans-serif" font-size="11" font-weight="700" letter-spacing="1.2" fill="#1e40af">TRACE HUB</text>
+        <text x="1020" y="363" font-family="ui-sans-serif, sans-serif" font-size="10" fill="#3b5fb8">identity · orders · checkout</text>
+
+        <!-- browser -->
+        <foreignObject x="30" y="430" width="230" height="200">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="node browser">
+            <div class="node-kicker">Browser</div>
+            <div class="node-title">Preact / TypeScript</div>
+            <ul>
+              <li>Board rendering and layers</li>
+              <li>Finding navigation</li>
+              <li>Revision upload</li>
+            </ul>
+            <span class="node-tag">displays completed results</span>
+          </div>
+        </foreignObject>
+
+        <!-- API -->
+        <foreignObject x="340" y="400" width="250" height="230">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="node spoke">
+            <div class="node-kicker">Spoke API</div>
+            <div class="node-title">FastAPI · Cloud Run</div>
+            <ul>
+              <li>Order context and manifest</li>
+              <li>Run lifecycle, findings, revisions</li>
+              <li>Assigned profile from Trace</li>
+              <li>Serves geometry and SSE</li>
+            </ul>
+          </div>
+        </foreignObject>
+
+        <!-- worker -->
+        <foreignObject x="670" y="400" width="250" height="230">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="node spoke">
+            <div class="node-kicker">Validation worker</div>
+            <div class="node-title">Python · Cloud Run Job</div>
+            <ul>
+              <li>Fetch files with authorized Hub access</li>
+              <li>Parse Gerber and Excellon</li>
+              <li>Normalize geometry</li>
+              <li>Run spoke-owned DFM rules</li>
+            </ul>
+            <div class="worker-flow"><span class="n">5</span> parse <span class="arrow">→</span> normalize <span class="arrow">→</span> validate</div>
+          </div>
+        </foreignObject>
+
+        <!-- postgres -->
+        <foreignObject x="340" y="720" width="220" height="120">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="node store">
+            <div class="node-kicker">Postgres</div>
+            <div class="node-title">Spoke database</div>
+            <ul>
+              <li>Run state and revisions</li>
+              <li>Findings</li>
+            </ul>
+          </div>
+        </foreignObject>
+
+        <!-- object storage -->
+        <foreignObject x="670" y="720" width="250" height="120">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="node store">
+            <div class="node-kicker">Object storage</div>
+            <div class="node-title">Derived artifacts</div>
+            <ul>
+              <li>Normalized geometry</li>
+              <li>Larger validation artifacts</li>
+            </ul>
+          </div>
+        </foreignObject>
+
+        <!-- hub api -->
+        <foreignObject x="1020" y="400" width="220" height="230">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="node hub">
+            <div class="node-kicker">Trace Hub API</div>
+            <div class="node-title">Order and checkout owner</div>
+            <ul>
+              <li>Order context and manifest</li>
+              <li>Original files and revisions</li>
+              <li>Assigned manufacturing profile</li>
+              <li>Findings and order-item endpoints</li>
+            </ul>
+            <span class="node-tag">originals stay here</span>
+          </div>
+        </foreignObject>
+
+        <!-- 1 browser -> api -->
+        <path d="M260 450H340" fill="none" stroke="#475467" stroke-width="1.6" marker-end="url(#arrow)"/>
+        <rect x="262" y="420" width="76" height="24" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="300" y="432" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="9.5" font-weight="600" fill="#475467">1 order</text>
+        <text x="300" y="443" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="9.5" font-weight="600" fill="#475467">context</text>
+
+        <!-- 2 api -> hub -->
+        <path d="M465 400V330H1160V400" fill="none" stroke="#475467" stroke-width="1.6" marker-end="url(#arrow)"/>
+        <rect x="700" y="312" width="210" height="18" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="805" y="324.5" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="10" font-weight="600" fill="#475467">2 context, manifest + profile</text>
+
+        <!-- 3 api -> worker -->
+        <path d="M590 470H670" fill="none" stroke="#475467" stroke-width="1.6" marker-end="url(#arrow)"/>
+        <rect x="592" y="436" width="76" height="24" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="630" y="448" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="9.5" font-weight="600" fill="#475467">3 dispatch</text>
+        <text x="630" y="459" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="9.5" font-weight="600" fill="#475467">job</text>
+
+        <!-- 4 worker -> hub -->
+        <path d="M920 450H1020" fill="none" stroke="#475467" stroke-width="1.6" marker-end="url(#arrow)"/>
+        <rect x="925" y="459" width="90" height="18" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="970" y="471.5" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="10" font-weight="600" fill="#475467">4 fetch files</text>
+
+        <!-- 6 worker -> object storage -->
+        <path d="M795 630V720" fill="none" stroke="#475467" stroke-width="1.6" marker-end="url(#arrow)"/>
+        <rect x="804" y="668" width="94" height="18" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="851" y="680.5" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="10" font-weight="600" fill="#475467">6 write geometry</text>
+
+        <!-- 7 worker -> api -->
+        <path d="M670 540H590" fill="none" stroke="#475467" stroke-width="1.6" marker-end="url(#arrow)"/>
+        <rect x="592" y="506" width="76" height="24" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="630" y="518" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="9.5" font-weight="600" fill="#475467">7 results</text>
+        <text x="630" y="529" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="9.5" font-weight="600" fill="#475467">findings</text>
+
+        <!-- 8 api -> postgres -->
+        <path d="M430 630V720" fill="none" stroke="#475467" stroke-width="1.6" marker-end="url(#arrow)"/>
+        <rect x="440" y="668" width="110" height="18" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="495" y="680.5" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="10" font-weight="600" fill="#475467">8 persist run state</text>
+
+        <!-- 9 api -> object storage -->
+        <path d="M550 630V680H700V720" fill="none" stroke="#475467" stroke-width="1.6" marker-end="url(#arrow)"/>
+        <rect x="565" y="662" width="100" height="18" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="615" y="674.5" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="10" font-weight="600" fill="#475467">9 read geometry</text>
+
+        <!-- 10 api -> browser SSE -->
+        <path d="M340 500H260" fill="none" stroke="#2563eb" stroke-width="1.6" marker-end="url(#arrowBlue)"/>
+        <rect x="262" y="466" width="76" height="24" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="300" y="478" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="9.5" font-weight="600" fill="#475467">10 progress</text>
+        <text x="300" y="489" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="9.5" font-weight="600" fill="#475467">completion</text>
+
+        <!-- 11 api -> browser results -->
+        <path d="M340 580H260" fill="none" stroke="#2563eb" stroke-width="1.6" marker-end="url(#arrowBlue)"/>
+        <rect x="262" y="546" width="76" height="24" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="300" y="558" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="9.5" font-weight="600" fill="#475467">11 results</text>
+        <text x="300" y="569" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="9.5" font-weight="600" fill="#475467">geometry</text>
+
+        <!-- 12 browser -> hub upload -->
+        <path d="M145 430V150H1215V400" fill="none" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#arrowBlue)"/>
+        <rect x="700" y="132" width="150" height="18" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="775" y="144.5" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="10" font-weight="600" fill="#475467">12 upload revision</text>
+
+        <!-- 13 api -> hub findings + items -->
+        <path d="M580 400V380H980V430H1020" fill="none" stroke="#475467" stroke-width="1.6" marker-end="url(#arrow)"/>
+        <rect x="790" y="362" width="160" height="18" rx="9" fill="#fff" stroke="#dfe3e8"/>
+        <text x="870" y="374.5" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="10" font-weight="600" fill="#475467">13 findings + items</text>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i class="trace"></i> Trace-owned</span>
+      <span><i class="spoke"></i> Spoke-owned</span>
+      <span><i class="browser"></i> Browser</span>
+      <span><i class="flow"></i> Data flow</span>
+      <span><i class="upload"></i> Revision upload</span>
+      <span style="margin-left:auto">Original files stay in Trace. Derived geometry stays in the spoke.</span>
+    </div>
+  </section>
+
+  <div class="columns">
+    <section class="card">
+      <div class="card-head"><h2>Components and responsibilities</h2><span class="count">6 parts</span></div>
+      <table class="table">
+        <thead><tr><th>Component</th><th>Responsibility</th></tr></thead>
+        <tbody>
+          <tr><td>Browser</td><td><span class="code">Preact / TypeScript</span><br>Board rendering, layer controls, finding navigation, revision upload</td></tr>
+          <tr><td>Spoke API</td><td><span class="code">FastAPI</span><br>Order context and manifest, run lifecycle, findings, revision management, Hub integration, geometry serving. Retrieves the assigned profile from Trace and applies the spoke-owned DFM ruleset.</td></tr>
+          <tr><td>Validation worker</td><td><span class="code">Python</span><br>Fetch package files with authorized Hub access, parse Gerber and Excellon, normalize geometry, run spoke-owned DFM rules</td></tr>
+          <tr><td>Database</td><td><span class="code">Postgres</span><br>Revisions, validation runs, findings, processing state</td></tr>
+          <tr><td>Object storage</td><td>Derived geometry and larger validation artifacts. The API reads it when serving the browser.</td></tr>
+          <tr><td>Trace Hub API</td><td>Order context, original package files and revisions, assigned manufacturing profile, findings and order-item endpoints</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Main flows</h2><span class="count">13 steps</span></div>
+      <ol class="flows">
+        <li>Browser requests <b>order context</b> from the spoke.</li>
+        <li>Spoke retrieves <b>order context, the package manifest, and the assigned manufacturing profile</b> from Trace.</li>
+        <li>Spoke dispatches a <b>validation job</b> with order ID, revision ID, and file references.</li>
+        <li>Worker fetches the actual <b>package files</b> from Trace using its own authorized Hub API access.</li>
+        <li>Worker <b>parses, normalizes and validates</b> the package.</li>
+        <li>Worker writes <b>derived geometry</b> to object storage.</li>
+        <li>Worker reports <b>result metadata and findings</b> to the API.</li>
+        <li>API persists <b>run state and findings</b> in Postgres.</li>
+        <li>API reads <b>derived geometry</b> from object storage when serving the browser.</li>
+        <li>API streams <b>validation progress and completion</b> to the browser over SSE.</li>
+        <li>API returns <b>results and the geometry reference or payload</b> to the browser, which displays the completed results.</li>
+        <li>Browser uploads a <b>revised package</b> to Trace. The customer triggers validation again from the spoke UI; the spoke reads the new revision through the Hub API and starts a new run.</li>
+        <li>After the run is persisted, the spoke posts <b>findings and priceable order items</b> to Trace. If Trace is unavailable, this post can be retried without rerunning validation.</li>
+      </ol>
+    </section>
+  </div>
+
+  <div class="ownership">
+    <b>Ownership in one line:</b> Trace owns identity, the order, the original package files and revisions, the assigned manufacturing profile, cost roll-up and checkout. The spoke owns interpretation, normalized geometry, runs, DFM rules and derived artifacts, and applies its own ruleset to the assigned profile. Revision upload goes to Trace; the customer triggers validation again from the spoke UI, and the spoke reads the new revision through the Hub API. Findings and items are posted only after the run is persisted, so a failed post can be retried without rerunning validation. The worker fetches files with its own authorized Hub API access and never talks to the database directly; it reports metadata and findings to the API, which persists run state.
+  </div>
+
+  <p class="footnote">The diagram is a design proposal, not a deployment snapshot. The browser never parses Gerber; it renders normalized geometry returned by the spoke.</p>
+</div>
+</body>
+</html>

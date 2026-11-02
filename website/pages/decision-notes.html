@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCB Validator - Decision notes</title>
+<style>
+  :root {
+    --bg: #eef0f3;
+    --line: #dfe3e8;
+    --line-soft: #eceff3;
+    --ink: #1b1f24;
+    --muted: #667085;
+    --faint: #98a2b3;
+    --accent: #2563eb;
+    --accent-soft: #eef4ff;
+    --warn: #b54708;
+    --warn-soft: #fffaeb;
+    --ok: #067647;
+    --ok-soft: #ecfdf3;
+    --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body { margin: 0; color: var(--ink); font: 14px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 44px 30px 90px; }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 7px; height: 31px;
+    padding: 0 12px; border: 1px solid var(--line); border-radius: 7px;
+    background: #fff; color: var(--ink); text-decoration: none;
+    font-size: 12px; font-weight: 600; margin-bottom: 20px;
+  }
+  .back-link:hover { border-color: #b9c0ca; background: #fcfcfd; }
+
+  .eyebrow { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  h1 { font-size: 34px; line-height: 1.12; margin: 10px 0 12px; letter-spacing: -.03em; }
+  .lede { max-width: 720px; margin: 0; color: var(--muted); font-size: 14.5px; }
+  .meta { margin-top: 12px; color: var(--faint); font-size: 11px; }
+  .meta b { color: var(--muted); }
+
+  .summary {
+    margin-top: 28px; padding: 20px 22px; border: 1px solid var(--line);
+    border-radius: 12px; background: #fff;
+    box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 10px 24px rgba(16,24,40,.05);
+  }
+  .summary .big { font-size: 19px; line-height: 1.3; letter-spacing: -.02em; font-weight: 700; }
+  .summary p { margin: 8px 0 0; color: #475467; font-size: 12.5px; line-height: 1.6; }
+  .summary .tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+  .tag {
+    display: inline-flex; align-items: center; height: 22px; padding: 0 8px;
+    border-radius: 5px; background: #f2f4f7; color: #475467;
+    font-size: 10px; font-weight: 700; letter-spacing: .02em;
+  }
+  .tag.blue { background: var(--accent-soft); color: #1d4ed8; }
+  .tag.orange { background: #fff7ed; color: #b45309; }
+
+  .notes { margin-top: 26px; border-top: 1px solid var(--line); }
+  .note {
+    display: grid; grid-template-columns: 54px minmax(0,1fr); gap: 18px;
+    padding: 24px 0; border-bottom: 1px solid var(--line);
+  }
+  .note .num {
+    font: 700 12px/1 var(--mono); color: var(--faint);
+    padding-top: 4px;
+  }
+  .note h2 { margin: 0 0 8px; font-size: 17px; letter-spacing: -.015em; }
+  .note p { margin: 0; color: #475467; font-size: 12.8px; line-height: 1.65; }
+  .note p + p { margin-top: 8px; }
+  .note .decision { color: var(--ink); }
+  .note .decision b { color: var(--accent); }
+  .trade {
+    margin-top: 11px; padding: 9px 12px; border-left: 3px solid #f79009;
+    background: var(--warn-soft); border-radius: 0 7px 7px 0;
+    color: #7a3d05; font-size: 11.8px; line-height: 1.55;
+  }
+  .trade b { color: #7a3d05; }
+  .build {
+    margin-top: 11px; padding: 9px 12px; border-left: 3px solid #12b76a;
+    background: var(--ok-soft); border-radius: 0 7px 7px 0;
+    color: #05603a; font-size: 11.8px; line-height: 1.55;
+  }
+  .build b { color: #05603a; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .split .box { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: #fcfcfd; }
+  .split .box h3 { margin: 0 0 5px; font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); }
+  .split ul { margin: 0; padding-left: 15px; color: #475467; font-size: 11.5px; line-height: 1.5; }
+  .split li + li { margin-top: 3px; }
+
+  .closing {
+    margin-top: 24px; padding: 16px 18px; border: 1px solid #d5e3ff;
+    background: var(--accent-soft); border-radius: 10px; color: #1e3a8a;
+    font-size: 12.5px; line-height: 1.6;
+  }
+  .closing b { color: #1e3a8a; }
+  .foot { margin-top: 26px; color: var(--faint); font-size: 11px; }
+
+  @media (max-width: 720px) {
+    .note { grid-template-columns: 34px minmax(0,1fr); gap: 12px; }
+    .split { grid-template-columns: 1fr; }
+    h1 { font-size: 29px; }
+  }
+  @media print {
+    body { background: #fff; }
+    .wrap { max-width: none; padding: 0; }
+    .back-link { display: none; }
+    .summary { box-shadow: none; }
+    .note { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back-link" href="index.html">← Back to overview</a>
+
+  <div class="eyebrow">Trace spoke · decisions</div>
+  <h1>Decision notes</h1>
+  <p class="lede">The choices behind the PCB Validator spoke, the trade-offs I accepted, and what I deliberately left out. This is the short version of the architecture and the mockups.</p>
+  <div class="meta"><b>One page · 6 decisions</b> · Browser, API, worker, ownership, finding lifecycle, MVP</div>
+
+  <section class="summary">
+    <div class="big">Server decides. Browser renders. Trace owns the order.</div>
+    <p>The validator is not an editor and not a second source of truth. It interprets a package, runs profile-specific checks, and returns findings and priceable items. The customer fixes the design in their EDA tool and uploads a new revision. The spoke earns trust by being deterministic and traceable, not by hiding the work in the browser.</p>
+    <div class="tags">
+      <span class="tag blue">Preact + TypeScript</span>
+      <span class="tag blue">FastAPI</span>
+      <span class="tag orange">Async Python worker</span>
+      <span class="tag">Postgres</span>
+      <span class="tag">Object storage</span>
+    </div>
+  </section>
+
+  <div class="notes">
+    <section class="note">
+      <div class="num">01</div>
+      <div>
+        <h2>Architecture choice</h2>
+        <p class="decision"><b>Decision.</b> A browser-based viewer, a FastAPI spoke API, and an asynchronous Python validation worker.</p>
+        <p>Parsing and DFM rules need one authoritative implementation. If they run in the browser, results depend on the client, the device, and how much geometry it can hold in memory. The server keeps that deterministic, and the worker isolates the slow, stateful part so the API can still serve order context and progress. The browser only renders normalized geometry, which keeps layer toggling and finding focus immediate.</p>
+        <div class="trade"><b>Trade-off.</b> More moving parts and an async progress path. I mitigate that with persisted run state, SSE for progress and completion, retries on the worker, and immutable runs that can be reopened or re-run.</div>
+      </div>
+    </section>
+
+    <section class="note">
+      <div class="num">02</div>
+      <div>
+        <h2>Processing approach</h2>
+        <p class="decision"><b>Decision.</b> Parse Gerber and Excellon, normalize geometry, run profile-specific DFM checks, and return findings.</p>
+        <p>Gerber and Excellon are terse and stateful. A wrong aperture, polarity, or drill unit changes the geometry silently, so there has to be one parser and one normalized representation in board units. Rules then evaluate that geometry against the manufacturing profile assigned to the order, not against a permissive default. A finding carries the rule id, measured value, required threshold, unit, layer, and a geometry reference.</p>
+        <div class="trade"><b>Trade-off.</b> Parser fidelity is the real risk, not the UI. I would build against one real customer package first and verify that every highlighted finding lands on the right trace before expanding the rule set.</div>
+      </div>
+    </section>
+
+    <section class="note">
+      <div class="num">03</div>
+      <div>
+        <h2>Ownership</h2>
+        <p class="decision"><b>Decision.</b> Trace owns orders, original files, identity, assigned manufacturing profiles, and checkout. The spoke owns validation runs, findings, rules, and derived artifacts.</p>
+        <p>Original files and the money path stay in the hub. Interpretation and engineering truth stay in the spoke. Findings are authored by the spoke but scoped to the order, so checkout can block on them. The worker fetches files with its own authorized Hub API access; it does not download through the API and it does not talk to Postgres. It reports metadata and findings to the API, and the API persists run state.</p>
+        <div class="trade"><b>Trade-off.</b> Some state is visible in two places: the hub scopes findings and items, the spoke keeps provenance. The rule is that the hub is authoritative for the order and the money, and the spoke is authoritative for the run and the geometry.</div>
+      </div>
+    </section>
+
+    <section class="note">
+      <div class="num">04</div>
+      <div>
+        <h2>Finding resolution</h2>
+        <p class="decision"><b>Decision.</b> Customers fix designs in their EDA software, upload a new revision, and rerun validation. Acknowledgement is not resolution.</p>
+        <p>A validator that can edit geometry becomes a second source of truth and a much larger product. The honest loop is: understand the constraint, change the board in the tool that owns the design, upload a revision, and let a new run prove the fix. Acknowledgement, will address, and request manufacturing review are tracking states. A finding closes only when a later run confirms the geometry is gone.</p>
+        <div class="trade"><b>Trade-off.</b> The loop is slower than a one-click fix, but it is trustworthy. A finding cannot disappear because someone checked a box, and the order keeps the evidence.</div>
+      </div>
+    </section>
+
+    <section class="note">
+      <div class="num">05</div>
+      <div>
+        <h2>Data and lifecycle</h2>
+        <p class="decision"><b>Decision.</b> Revision-scoped validation runs, persisted state and findings, and object storage for larger derived artifacts.</p>
+        <p>Every revision is immutable and identified by a content hash. Every run records the revision hash, parser versions, ruleset version, profile snapshot, worker image, timestamps, and outcome. Findings link back to the run, the rule, and the geometry. A re-run creates a new run, never an in-place edit, so "why did this pass last week" stays answerable. Postgres holds run state and findings; object storage holds normalized geometry and larger artifacts, and the API reads it when serving the browser.</p>
+        <div class="trade"><b>Trade-off.</b> Storage grows with every revision and run. The mitigation is content-hash reuse, a retention policy for superseded artifacts, and keeping the source package in Trace rather than copying it into the spoke.</div>
+      </div>
+    </section>
+
+    <section class="note">
+      <div class="num">06</div>
+      <div>
+        <h2>MVP and non-goals</h2>
+        <p class="decision"><b>Decision.</b> Ship the core loop: the supported file formats, layer viewing, a focused set of DFM checks, findings, and order-item handoff.</p>
+        <p>The MVP is one package shape (RS-274X Gerber plus Excellon), initial support for a defined four-layer board configuration, explicit layer mapping, normalized geometry, a board viewer, a small rule set, revision upload and revalidation, findings, and priceable items posted back to Trace. The checks I would start with are clearance, annular ring, drill aspect ratio, soldermask sliver, and copper to board edge. That is enough to prove the loop and enough to be wrong in useful ways.</p>
+        <div class="split">
+          <div class="box">
+            <h3>In the MVP</h3>
+            <ul>
+              <li>Gerber and Excellon package</li>
+              <li>Defined four-layer configuration</li>
+              <li>Layer mapping and viewer</li>
+              <li>Focused DFM rules</li>
+              <li>Findings with geometry</li>
+              <li>Revision upload and rerun</li>
+              <li>Findings and order items in Trace</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Not building</h3>
+            <ul>
+              <li>PCB editor or auto-repair</li>
+              <li>Every CAD and Gerber dialect</li>
+              <li>Electrical, signal, thermal checks</li>
+              <li>Stackup, BOM, stencil or assembly apps</li>
+              <li>Checkout, payments or tracking</li>
+              <li>Generic workflow platform</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="closing">
+    <b>What I would retire first:</b> parser fidelity and the mapping from a finding to the exact geometry. If a highlighted clearance lands on the wrong trace, nothing else in the product matters. The rest of the system is conventional; that mapping is where trust is won or lost.
+  </div>
+
+  <p class="foot">Design exercise for Alpha Machines. The mockups and architecture diagram are linked from the overview.</p>
+</div>
+</body>
+</html>
