@@ -5,7 +5,7 @@
 The PCB Validator uses a hub-and-spoke architecture.
 
 - **Trace** owns identity, orders, original package files, revisions, assigned manufacturing profiles, cost roll-up, and checkout.
-- **The PCB Validator spoke** owns package interpretation, normalized geometry, validation runs, rules, findings, and derived artifacts.
+- **The PCB Validator spoke** owns package interpretation, normalized geometry, validation runs, rules, validation findings and their provenance, and derived artifacts.
 - **The browser** displays normalized geometry and validation results. It does not parse Gerber files.
 
 ## System Components
@@ -105,6 +105,7 @@ The worker writes derived artifacts to object storage. The API reads these artif
 - Package revisions.
 - Assigned manufacturing profiles.
 - Cost roll-up.
+- Order-scoped findings and their checkout impact.
 - Checkout.
 
 ### PCB Validator spoke owns
@@ -113,7 +114,7 @@ The worker writes derived artifacts to object storage. The API reads these artif
 - Geometry parsing and normalization.
 - Validation rules.
 - Validation runs.
-- Findings.
+- Validation findings, including computation, provenance and resolution across runs.
 - Derived geometry.
 - Validation artifacts.
 
